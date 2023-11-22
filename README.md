@@ -238,7 +238,10 @@ Pd = 10mW	→ lembre-se que estava em mW no enunciado, então vc corta o mili na
 #### Agora tente resolver esses valores
 
 a) Converta 13dBm para escala linear
+
 b) Converta 17dBm para escala linear
+
 c) Converta -41dBm para escala linear
+
 d) Converta -35dBm para escala linear
 
