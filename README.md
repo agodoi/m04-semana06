@@ -177,30 +177,35 @@ Cada grupo deve descrecer sobre o que aprendeu ou entendeu nessa prática.
 
 ## Conceitos sobre o dBm
 
-O dB é um parâmetro de medição de intensidade de um sinal qualquer. Lembrando que potência é dado em Watt;
+O dB é um parâmetro de medição de intensidade de um sinal qualquer. Lembrando que potência é dado em Watt. 
 
 d → dez
+
 B → Bell → que veio de Alexandre Graham Bell (inventor do telefone fixo)
 
-Equação do dB = 10 . log (Pdesejada / Preferência) 
+m → é de milésimo de dB (é opcional)
+
+## Equação do dB
+
+Equação do dB = 10 . log (P_desejado / P_referência) 
 
 Note que esse número dB está na escala logarítmica;
 
-Portanto, dB é um valor referencial, isto é, Pdesejada está comparável a um outro número (Preferência)
+Portanto, dB é um valor referencial, isto é, P_desejado está comparável a um outro número (P_referência)
 
-Quais valores usados para Pref? → 1W ou 1mW
+Quais valores usados para P_ref? → 1W ou 1mW
 
 Exemplo:
 
 Tenho um sinal de WiFi chegando no meu ESP32 de intensidade de -10dBW
 
-Significa que o sinal se enfraqueceu 10dB em relação ao Preferência de 1W
+Significa que o sinal se enfraqueceu 10dB em relação ao P_referência de 1W
 
 Outro exemplo:
 
 Tenho um sinal de WiFi chegando no meu ESP32 de intensidade de -13dBm
 
-Significa que o sinal se enfraqueceu 13dB em relação ao Preferência de 1mW
+Significa que o sinal se enfraqueceu 13dB em relação ao P_referência de 1mW
 
 O que você precisa saber para fazer essas contas? Que…
 
