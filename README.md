@@ -117,6 +117,7 @@ Etapas:
 6) Ligue o outro terminal do R no pino D2 do ESP32;
 7) Atualize esses campos do código-fonte da sua forma:
 ```
+const char *UBIDOTS_TOKEN = "";  // peque o seu TOKEN da sua conta particular. Vá na sua foto do seu perfil do Ubidots, e clique em "Credenciais da API" e pegue o "Default Token" e cole aqui
 const char *WIFI_SSID = "";      // use o WiFi do seu celular nesse primeiro momento, pois o proxy local pode bloquear seu acesso
 const char *WIFI_PASS = "";      // use a senha senha do roteador do seu celular
 const char *DEVICE_LABEL = "";   // crie um nome qualquer para o seu dispositivo
