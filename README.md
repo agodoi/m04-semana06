@@ -169,3 +169,64 @@ ubidots.publish(PUBLISH_DEVICE_LABEL2);
 
 [Referência](https://help.ubidots.com/en/articles/748067-connect-an-esp32-devkitc-to-ubidots-over-mqtt?_gl=1*1weeu9s*_ga*NTM1ODIzMjQzLjE2NzMyNjQ2NjY.*_ga_VEME7QQ5EZ*MTY4NDc2MzgxOC40OC4xLjE2ODQ3NjYwMTQuNTMuMC4w)
 
+## Conclusões sobre o MQTT
+
+Cada grupo deve descrecer sobre o que aprendeu ou entendeu nessa prática.
+
+[Clique aqui](https://jamboard.google.com/d/1DeO6qMXhEGPfSgDyyLa0RFzKe3BcfY5c9m2odPYT3j4/edit?usp=sharing) e deixe sua conclusão em 1 ou 2 post-it no Jamboard, que ele será lido hoje.
+
+## Conceitos sobre o dBm
+
+O dB é um parâmetro de medição de intensidade de um sinal qualquer. Lembrando que potência é dado em Watt;
+
+d → dez
+B → Bell → que veio de Alexandre Graham Bell (inventor do telefone fixo)
+
+Equação do dB = 10 . log (Pdesejada / Preferência) 
+
+Note que esse número dB está na escala logarítmica;
+
+Portanto, dB é um valor referencial, isto é, Pdesejada está comparável a um outro número (Preferência)
+
+Quais valores usados para Pref? → 1W ou 1mW
+
+Exemplo:
+
+Tenho um sinal de WiFi chegando no meu ESP32 de intensidade de -10dBW
+
+Significa que o sinal se enfraqueceu 10dB em relação ao Preferência de 1W
+
+Outro exemplo:
+
+Tenho um sinal de WiFi chegando no meu ESP32 de intensidade de -13dBm
+
+Significa que o sinal se enfraqueceu 13dB em relação ao Preferência de 1mW
+
+O que você precisa saber para fazer essas contas? Que…
+
+
+1dB		→ ganho de intensidade de  1,25 (é o mesmo que multiplicar por 1,25 na escala linear)
+
+-1dB 		→perda de intensidade de 0,79 (é o mesmo que multiplicar por 0,79 na escala linear)
+
+3dB		→ ganho de 1,995
+
+-3dB		→ perda na escala de 0,5
+
+10dB		→ ganho de 10x
+
+-10dB	→ perda na escala de 0,1
+
+### Exemplos práticos
+
+Um sinal está com 10dBm na entrada da minha antena. Quanto isso vale na escala linear comparado com 1mW, ou seja, quanto vale Pdesejado?
+
+X 		= 10 . log (Pd / 1mW)
+
+10dBm 	= 10. log (Pd / 1mW)
+10dBm 	= 10. log (Pd / 1mW)		→ você pode cancelar os milis envolvidos
+		10		=        log (Pd)
+		10/10		=        log (Pd)
+		1		=        log (Pd)
+		10^1		=	Pd		→ Pd = 10mW	→ lembre-se que estava em mW no enunciado, então vc corta o mili nas contas, mas retorne ele no resultado
+
