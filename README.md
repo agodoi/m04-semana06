@@ -127,3 +127,37 @@ const char *VARIABLE_LABEL = ""; // crie um nome qualquer de variável que terá
 8) Grave esse código no seu ESP32;
 9) Vá no seu ambiente Ubidots, e clique em **Dispositivos** e novamente, selecione a opção **Dispositivos**;
 10) Você já verá o label do device que você criou em ```const char *DEVICE_LABEL = ""```;
+11) Clique na variável ```const char *VARIABLE_LABEL = ""``` para ter acesso aos dados chegando, que nesse caso, será **0** ou **1** que indica se o LED está ligado ou desligado;
+12) Associe um widget à essa variável e controle o ligar-desligar do seu LED.
+
+## Comentário do código
+
+```
+const int PUBLISH_FREQUENCY = 1000;    //essa linha é o tempo de atualização do envio do MQTT
+unsigned long timer;
+```
+
+Dentro do Void loop ()... adição do envio da variável e device para o Ubidots para facilitar a configuração da dashboard lá dentro do Ubidots
+
+if(millis() - timer > PUBLISH_FREQUENCY){
+    ubidots.add(VARIABLE_LABEL, 0);       //essa linha está associando o valor 0 na variável em questão
+    ubidots.publish(DEVICE_LABEL);        //essa linha publica os dados no protocolo MQTT
+    timer = millis();                     //essa linha atualiza o valor de millis() que é um contato interno do ESP32
+}
+
+## Onde se  publica as variáveis e seus valores usando MQTT?
+
+ubidots.add(PUBLISH_VARIABLE_LABEL, value); → manda a variável
+ubidots.publish(PUBLISH_DEVICE_LABEL); → manda o device
+
+Para vários sensores, como publicar? Simples, adicione um par de linhas para cada sensor:
+ubidots.add(PUBLISH_VARIABLE_LABEL1, value1);
+ubidots.publish(PUBLISH_DEVICE_LABEL1);
+ubidots.add(PUBLISH_VARIABLE_LABEL2, value2);
+ubidots.publish(PUBLISH_DEVICE_LABEL2);
+… e assim quantos sensores existirem no seu projeto
+
+## Referência da Prática
+
+[Referência](https://help.ubidots.com/en/articles/748067-connect-an-esp32-devkitc-to-ubidots-over-mqtt?_gl=1*1weeu9s*_ga*NTM1ODIzMjQzLjE2NzMyNjQ2NjY.*_ga_VEME7QQ5EZ*MTY4NDc2MzgxOC40OC4xLjE2ODQ3NjYwMTQuNTMuMC4w)
+
