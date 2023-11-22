@@ -224,9 +224,14 @@ Um sinal está com 10dBm na entrada da minha antena. Quanto isso vale na escala 
 X 		= 10 . log (Pd / 1mW)
 
 10dBm 	= 10. log (Pd / 1mW)
-10dBm 	= 10. log (Pd / 1mW)		→ você pode cancelar os milis envolvidos
-		10		=        log (Pd)
-		10/10		=        log (Pd)
-		1		=        log (Pd)
-		10^1		=	Pd		→ Pd = 10mW	→ lembre-se que estava em mW no enunciado, então vc corta o mili nas contas, mas retorne ele no resultado
+
+10dBm = 10. log (Pd / 1mW)		→ você pode cancelar os milis envolvidos
+
+10/10 =     log (Pd)
+
+1     =     log (Pd)
+
+10^1  =	         Pd
+
+Pd = 10mW	→ lembre-se que estava em mW no enunciado, então vc corta o mili nas contas, mas retorne ele no resultado
 
