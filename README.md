@@ -148,6 +148,7 @@ if(millis() - timer > PUBLISH_FREQUENCY){
 ## Onde se  publica as variáveis e seus valores usando MQTT?
 
 ubidots.add(PUBLISH_VARIABLE_LABEL, value); → manda a variável
+
 ubidots.publish(PUBLISH_DEVICE_LABEL); → manda o device
 
 Para vários sensores, como publicar? Simples, adicione um par de linhas para cada sensor:
