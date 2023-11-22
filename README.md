@@ -44,7 +44,7 @@ O Ubidots é uma plataforma IoT baseada em nuvem que permite a coleta, armazenam
 ## Diagrama de Blocos do Funcionamento
 
 1. **Criação de uma Conta e Projeto:**
-   - Primeiramente, você precisa criar uma conta no Ubidots e iniciar um projeto. Durante esse processo, você obtém um token de acesso exclusivo associado ao seu projeto. Para esse caso do Inteli, a conta será criada pela coordenação/instrutor de programação.
+   - Primeiramente, você precisa criar uma conta no Ubidots e iniciar um projeto. Durante esse processo, você obtém um token de acesso exclusivo associado ao seu projeto. Para esse caso do Inteli, você terá que abrir a sua conta pessoal Ubidots e ainda, terá outra conta que será criada pela coordenação/instrutor de programação. Essa segunda conta será a oficial do seu projeto. Hoje vamos criar a sua conta pessoal, e depois, num segundo momento, chegará a segunda conta. Essa segunda conta estará no nome do representante do grupo, mas a senha será pública entre as pessoas do mesmo grupo.
 
 2. **Registro do Dispositivo:**
    - Para cada dispositivo IoT que você deseja conectar ao Ubidots, você precisará registrá-lo no seu projeto com um label. Isso é feito no seu código-fonte do ESP32 e o Ubidots criará automaticamente caso ele nãop esteja criado. Veja o diagrama de blocos a seguir para melhor entender.
@@ -59,6 +59,34 @@ O Ubidots é uma plataforma IoT baseada em nuvem que permite a coleta, armazenam
    <source media="(prefers-color-scheme: light)" srcset="https://github.com/agodoi/m04-semana06/blob/main/imgs/dc0ffa6-ubidots-data.png">
    <img alt="Família ESP32" src="[YOUR-DEFAULT-IMAGE](https://github.com/agodoi/m04-semana06/blob/main/imgs/dc0ffa6-ubidots-data.png)">
 </picture>
+
+
+#### Valores [value]
+Um valor numérico. O Ubidots aceita número de ponto flutuante de até 16 casas decimais.
+
+{"valor" : 34.87654974}
+
+#### Carimbos de Tempo [timestamp]
+
+Um carimbo de tempo é uma maneira de rastrear o tempo como um total contínuo de segundos. Esta contagem começou no Unix Epoch em 1º de janeiro de 1970, no UTC. Portanto, o carimbo de tempo Unix é meramente o número de segundos entre uma data específica e o Unix Epoch. Por favor, tenha em mente que ao enviar dados para o Ubidots, você deve definir o carimbo de tempo em milissegundos. Além disso, se você recuperar o carimbo de tempo de um ponto, este estará em milissegundos.
+
+"carimbo de tempo" : 1537453824000
+
+O carimbo de tempo acima corresponde a quinta-feira, 20 de setembro de 2018, às 14:30:24.
+
+DICA PROFISSIONAL: Uma ferramenta útil para converter entre carimbos de tempo Unix e datas legíveis por humanos é o Epoch Converter.
+
+#### Contexto
+
+Valores numéricos não são o único tipo de dado suportado. Você também pode armazenar tipos de dados de string ou char no que chamamos de contexto. O contexto é um objeto de chave-valor que permite armazenar não apenas valores numéricos, mas também valores de string. Um exemplo de uso do contexto poderia ser:
+
+"contexto" : {"status" : "ligado", "clima" : "ensolarado"}
+
+O contexto é comumente usado para armazenar as coordenadas de latitude e longitude do seu dispositivo para casos de uso de GPS/rastreamento. Todos os mapas do Ubidots usam as chaves lat e lng do contexto de um ponto para extrair as coordenadas do seu dispositivo. Dessa forma, você só precisa enviar um único ponto com os valores das coordenadas no contexto da variável para plotar um mapa, em vez de enviar separadamente tanto a latitude quanto a longitude em duas variáveis diferentes. Abaixo, você pode encontrar um contexto típico com valores de coordenadas:
+
+"contexto" : {"lat":-6.2, "lng":75.4, "clima" : "ensolarado"}
+
+Observe que você pode misturar tanto valores de string quanto numéricos no contexto. Se sua aplicação for para fins de geo-localização, certifique-se de que as coordenadas estejam definidas em graus decimais.
 
 5. **Validação do Token:**
    - Cada solicitação de dados enviada pelo dispositivo inclui o token de acesso associado ao seu projeto Ubidots. Esse token é validado pela plataforma para garantir que a solicitação seja legítima e autorizada.
@@ -76,5 +104,7 @@ O Ubidots é uma plataforma IoT baseada em nuvem que permite a coleta, armazenam
    <source media="(prefers-color-scheme: light)" srcset="https://github.com/agodoi/m04-semana06/blob/main/imgs/diagrama_blocos.png">
    <img alt="Família ESP32" src="[YOUR-DEFAULT-IMAGE](https://github.com/agodoi/m04-semana06/blob/main/imgs/diagrama_blocos.png)">
 </picture>
+
+## Parte prática
 
 
