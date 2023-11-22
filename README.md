@@ -141,10 +141,8 @@ Dentro do Void loop ()... adição do envio da variável e device para o Ubidots
 
 if(millis() - timer > PUBLISH_FREQUENCY){
     
-    ubidots.add(VARIABLE_LABEL, 0);       //essa linha está associando o valor 0 na variável em questão
-    
+    ubidots.add(VARIABLE_LABEL, 0);       //essa linha está associando o valor 0 na variável em questão 
     ubidots.publish(DEVICE_LABEL);        //essa linha publica os dados no protocolo MQTT
-    
     timer = millis();                     //essa linha atualiza o valor de millis() que é um contato interno do ESP32
 }
 
