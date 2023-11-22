@@ -125,3 +125,5 @@ const char *VARIABLE_LABEL = ""; // crie um nome qualquer de variável que terá
 
 ```
 8) Grave esse código no seu ESP32;
+9) Vá no seu ambiente Ubidots, e clique em **Dispositivos** e novamente, selecione a opção **Dispositivos**;
+10) Você já verá o label do device que você criou em ```const char *DEVICE_LABEL = ""```;
