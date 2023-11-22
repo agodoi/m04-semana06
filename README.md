@@ -152,10 +152,15 @@ ubidots.add(PUBLISH_VARIABLE_LABEL, value); → manda a variável
 ubidots.publish(PUBLISH_DEVICE_LABEL); → manda o device
 
 Para vários sensores, como publicar? Simples, adicione um par de linhas para cada sensor:
+
 ubidots.add(PUBLISH_VARIABLE_LABEL1, value1);
+
 ubidots.publish(PUBLISH_DEVICE_LABEL1);
+
 ubidots.add(PUBLISH_VARIABLE_LABEL2, value2);
+
 ubidots.publish(PUBLISH_DEVICE_LABEL2);
+
 … e assim quantos sensores existirem no seu projeto
 
 ## Referência da Prática
