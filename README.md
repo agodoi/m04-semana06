@@ -76,7 +76,7 @@ O carimbo de tempo acima corresponde a quinta-feira, 20 de setembro de 2018, às
 
 DICA PROFISSIONAL: Uma ferramenta útil para converter entre carimbos de tempo Unix e datas legíveis por humanos é o Epoch Converter.
 
-#### Contexto
+#### Contexto [context]
 
 Valores numéricos não são o único tipo de dado suportado. Você também pode armazenar tipos de dados de string ou char no que chamamos de contexto. O contexto é um objeto de chave-valor que permite armazenar não apenas valores numéricos, mas também valores de string. Um exemplo de uso do contexto poderia ser:
 
@@ -107,4 +107,11 @@ Observe que você pode misturar tanto valores de string quanto numéricos no con
 
 ## Parte prática
 
+Etapas:
+
+1) Instale a biblioteca Ubidots no Arduino IDE. Puxe os dois arquivos zip [dessa pasta](https://drive.google.com/drive/folders/10FC273CVdW05TD02czb3Ic7egROspJ67?usp=share_link) e adicione na sua IDE.
+2) Faça o [donwload](https://docs.google.com/document/d/16XECwRzPNouLuc8NXMfkkcSZ2op2C6hjdl63yghBveo/edit?usp=sharing) desse exemplo de Liga-Desliga LED e salve no seu computador.
+3) Grave esse código no seu ESP32, mas use do WiFi do seu celular, pois na rede interna do Inteli, o proxy pode bloquear. Faça testes em ambos WiFi disponíveis no Inteli.
+4) Abra sua conta particular e gratuita do [Ubidots Stem](https://ubidots.com/stem). Fique atento que o final da URL tem que ser STEM para ser uma conta de estudante.
+5)  
 
