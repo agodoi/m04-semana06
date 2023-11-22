@@ -109,9 +109,18 @@ Observe que você pode misturar tanto valores de string quanto numéricos no con
 
 Etapas:
 
-1) Instale a biblioteca Ubidots no Arduino IDE. Puxe os dois arquivos zip [dessa pasta](https://drive.google.com/drive/folders/10FC273CVdW05TD02czb3Ic7egROspJ67?usp=share_link) e adicione na sua IDE.
-2) Faça o [donwload](https://docs.google.com/document/d/16XECwRzPNouLuc8NXMfkkcSZ2op2C6hjdl63yghBveo/edit?usp=sharing) desse exemplo de Liga-Desliga LED e salve no seu computador.
-3) Grave esse código no seu ESP32, mas use do WiFi do seu celular, pois na rede interna do Inteli, o proxy pode bloquear. Faça testes em ambos WiFi disponíveis no Inteli.
-4) Abra sua conta particular e gratuita do [Ubidots Stem](https://ubidots.com/stem). Fique atento que o final da URL tem que ser STEM para ser uma conta de estudante.
-5)  
+1) Abra sua conta particular e gratuita do [Ubidots Stem](https://ubidots.com/stem). Fique atento que o final da URL tem que ser STEM para ser uma conta de estudante;
+2) Instale a biblioteca Ubidots no Arduino IDE. Puxe os dois arquivos zip [dessa pasta](https://drive.google.com/drive/folders/10FC273CVdW05TD02czb3Ic7egROspJ67?usp=share_link) e adicione na sua IDE;
+3) Faça o [donwload](https://docs.google.com/document/d/16XECwRzPNouLuc8NXMfkkcSZ2op2C6hjdl63yghBveo/edit?usp=sharing) desse exemplo de Liga-Desliga LED e salve no seu computador;
+4) Deixe o seu ESP32 próximo do seu protoboard (ou até afixe seu ESP32 no próprio protoboard) para conectar a um LED externo;
+5) Coloque um resistor de aproximadamente 330 ohms no pino positivo do LED, e no pino negativo do LED, conecte ao GND do ESP32;
+6) Ligue o outro terminal do R no pino D2 do ESP32;
+7) Atualize esses campos do código-fonte da sua forma:
+```
+const char *WIFI_SSID = "";      // use o WiFi do seu celular nesse primeiro momento, pois o proxy local pode bloquear seu acesso
+const char *WIFI_PASS = "";      // use a senha senha do roteador do seu celular
+const char *DEVICE_LABEL = "";   // crie um nome qualquer para o seu dispositivo
+const char *VARIABLE_LABEL = ""; // crie um nome qualquer de variável que terá os dados da sua aplicação
 
+```
+8) Grave esse código no seu ESP32;
