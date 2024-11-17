@@ -403,10 +403,10 @@ Ao utilizar relés em projetos com o ESP32, é importante ter alguns cuidados pa
 #### **4. Configuração do ESP32 para MQTT**
 - **Requisitos**:
   - Arduino IDE instalada.
-  - Biblioteca `PubSubClient` para comunicação MQTT (pode ser instalada através do Gerenciador de Bibliotecas da IDE Arduino).
+  - Biblioteca ```PubSubClient``` para comunicação MQTT (pode ser instalada através do Gerenciador de Bibliotecas da IDE Arduino).
 
 #### **5. Exemplo de Código para o ESP32**
-- **Passo 1**: Conecte o ESP32 ao Wi-Fi e ao broker HiveMQ usando a biblioteca `PubSubClient`.
+- **Passo 1**: Conecte o ESP32 ao Wi-Fi e ao broker HiveMQ usando a biblioteca ```PubSubClient```.
   
   ```
   #include <WiFi.h>
@@ -477,9 +477,9 @@ Ao utilizar relés em projetos com o ESP32, é importante ter alguns cuidados pa
   ```
 
 #### 6. Passo a Passo para Configuração e Execução
-- **Conectar ESP32 ao Wi-Fi**: Garanta que `ssid` e `password` estão corretos.
+- **Conectar ESP32 ao Wi-Fi**: Garanta que ```ssid``` e ```password``` estão corretos.
 - **Configurar Credenciais do Broker MQTT**: Utilize as informações fornecidas pelo HiveMQ (endereço do broker, porta, usuário e senha).
-- **Subscribing (Assinando)**: O ESP32 se inscreverá para receber mensagens de um tópico (`meutopico/teste`).
+- **Subscribing (Assinando)**: O ESP32 se inscreverá para receber mensagens de um tópico (```meutopico/teste```).
 - **Publishing (Publicando)**: O ESP32 publicará mensagens periodicamente.
 
 #### 7. Testando a Comunicação
@@ -487,7 +487,7 @@ Ao utilizar relés em projetos com o ESP32, é importante ter alguns cuidados pa
 - Verifique se o ESP32 está recebendo mensagens do tópico no qual está inscrito.
 
 #### 8. Segurança (Opcional)
-- Para conexões seguras, configure a porta 8883 e ajuste as opções de TLS na biblioteca `PubSubClient` (incluindo certificados, se necessário).
+- Para conexões seguras, configure a porta 8883 e ajuste as opções de TLS na biblioteca ```PubSubClient``` (incluindo certificados, se necessário).
 
 ---
 
