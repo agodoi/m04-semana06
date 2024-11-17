@@ -1,252 +1,385 @@
-# Comunicação à Distância
+# Sistema de Disparo de Atuadores
 
-Nesse encontro, veremos como a comunicação entre o microcontrolador e os blocos externos acontece, como por exemplo, como o ESP32 utiliza a comunicação WiFi com o protocolo MQTT passando pelas camadas de Rede, Internet, Transporte e Aplicação. A parte prática será o controle de um LED por meio da Internet e Ubidots.
+Neste encontro, será apresentado como ativar acionadores básicos (linha de força, motores, relés) a partir da resposta de sensores de forma a implementar regras de atuação. Adicionalmente, trataremos no detalhe, como funciona a comunicação I2C.
 
-## Arquitetura do projeto usando Ubidots
+## Assuntos relacionados
 
-Confira na figura a seguir, como será o seu projeto usando a plataforma Ubidots.
+- Atuadores
 
-O Ubidots é uma plataforma IoT que oferece uma variedade de recursos para facilitar o desenvolvimento e gerenciamento de projetos IoT. Vatagens:
+- Interfaces de comunicação
 
-1. **Interface Amigável:** O Ubidots possui uma interface de usuário intuitiva e amigável, o que facilita a configuração, monitoramento e análise de dados do seu dispositivo IoT. Não precisa desenvolver seu front-end nesse projeto.
+- Microcontroladores
 
-2. **Suporte a Diversos Dispositivos e Protocolos:** A plataforma suporta uma variedade de dispositivos e alguns protocolos IoT (MQTT e HTTP), permitindo a integração fácil de diferentes tipos de sensores e hardware. Em especial, vamos usar o protocolo MQTT e a quantidade de sensor que o ESP32 suportar.
+- HiveMQ
 
-3. **Visualização de Dados em Tempo Real:** Fornece ferramentas para visualização de dados em tempo real, incluindo gráficos e dashboards personalizáveis, permitindo que os usuários monitorem facilmente o status de seus dispositivos IoT.
+## Perguntas que podem impactar o seu projeto:
 
-4. **Regras e Ações Personalizadas:** Permite a configuração de regras e ações personalizadas com base nos dados coletados, facilitando a automação e a resposta a eventos específicos.
+### (1) Quantos sensores I2C cabem no ESP32?
 
-5. **Segurança:** Oferece recursos de segurança robustos para proteger os dados transmitidos e armazenados, garantindo a integridade e confidencialidade das informações.
+### (2) Quais ideias podem melhorar o seu projeto?
 
-6. **Escalabilidade:** A plataforma é projetada para ser escalável, permitindo que os usuários aumentem o número de dispositivos conectados e gerenciem grandes frotas de dispositivos IoT.
+### (3) Qual a vantagem de se usar sensores I2C?
 
-7. **Facilidade de Conectividade:** Simplifica a configuração de conexões entre dispositivos e a nuvem, proporcionando uma experiência mais suave para os desenvolvedores.
+### (4) Quais os cuidados se você usar relés no seu projeto?
 
-8. **Suporte Técnico:** Oferece suporte técnico para ajudar os desenvolvedores a superar desafios e resolver problemas durante a implementação de projetos IoT.
+### (5) Vantagens do HiveMQ vs Ubidots
 
-<picture>
-   <source media="(prefers-color-scheme: light)" srcset="https://github.com/agodoi/m04-semana06/blob/main/imgs/arquitetura_geral_mqtt.jpg">
-   <img alt="Família ESP32" src="[YOUR-DEFAULT-IMAGE](https://github.com/agodoi/m04-semana06/blob/main/imgs/arquitetura_geral_mqtt.jpg)">
-</picture>
+https://portal.vidadesilicio.com.br/descobrindo-o-endereco-i2c/
 
-O Ubidots é uma plataforma IoT baseada em nuvem que permite a coleta, armazenamento, visualização e análise de dados provenientes de dispositivos IoT. O processo de como os dados chegam ao Ubidots, são validados por meio de token e processados pelas informações do dispositivo IoT geralmente segue os seguintes passos:
 
-## Documentação Ubidots
+## Protocolo I2C
 
-[Referência](https://docs.ubidots.com/reference/welcome)
+O barramento I2C (Inter-Integrated Circuit) é um protocolo de comunicação serial que permite a interconexão de vários dispositivos em um mesmo barramento. 
 
-[Códigos](https://github.com/ubidots)
+No ESP32, o I2C é implementado por meio de hardware e software. Veja na Fig. 1, como se comporta fisicamente as conexões eletrônica no barramento I2C.
 
-[Exemplos de Desenvolvimento](https://dev.ubidots.com/devices/industrial-iot?_gl=1*dmqooy*_ga*NDExMzY1MTYxLjE2OTQ1NDI2MTA.*_ga_VEME7QQ5EZ*MTcwMDY1NzMwNy4xNi4xLjE3MDA2NTc1MDguNjAuMC4w)
-
-[Exemplo de Projetos](https://www.hackster.io/ubidots/projects)
-
-## Diagrama de Blocos do Funcionamento
-
-1. **Criação de uma Conta e Projeto:**
-   - Primeiramente, você precisa criar uma conta no Ubidots e iniciar um projeto. Durante esse processo, você obtém um token de acesso exclusivo associado ao seu projeto. Para esse caso do Inteli, você terá que abrir a sua conta pessoal Ubidots e ainda, terá outra conta que será criada pela coordenação/instrutor de programação. Essa segunda conta será a oficial do seu projeto. Hoje vamos criar a sua conta pessoal, e depois, num segundo momento, chegará a segunda conta. Essa segunda conta estará no nome do representante do grupo, mas a senha será pública entre as pessoas do mesmo grupo.
-
-2. **Registro do Dispositivo:**
-   - Para cada dispositivo IoT que você deseja conectar ao Ubidots, você precisará registrá-lo no seu projeto com um label. Isso é feito no seu código-fonte do ESP32 e o Ubidots criará automaticamente caso ele nãop esteja criado. Veja o diagrama de blocos a seguir para melhor entender.
-
-3. **Integração do Dispositivo com a API Ubidots:**
-   - No firmware ou software do seu dispositivo IoT, você incorporará a lógica para enviar dados para o Ubidots usando a API fornecida pela plataforma. Isso geralmente é feito por meio de solicitações HTTP ou MQTT, dependendo do protocolo que você escolheu no seu projeto. Nesse projeto, vamos focar no MQTT.
-
-4. **Envio de Dados para o Ubidots:**
-   - Periodicamente, o dispositivo envia dados para o Ubidots que ele chama de **DOT**. Esses DOT inclui **valeu**, **timestamp** e **context**. Veja a figura a seguir:
 
 <picture>
-   <source media="(prefers-color-scheme: light)" srcset="https://github.com/agodoi/m04-semana06/blob/main/imgs/dc0ffa6-ubidots-data.png">
-   <img alt="Família ESP32" src="[YOUR-DEFAULT-IMAGE](https://github.com/agodoi/m04-semana06/blob/main/imgs/dc0ffa6-ubidots-data.png)">
+   <source media="(prefers-color-scheme: light)" srcset="https://github.com/agodoi/m04-semana08/blob/main/imgs/barramentoI2C.png">
+   <img alt="Barramento I2C" src="(https://github.com/agodoi/m04-semana08/blob/main/imgs/barramentoI2C.png)" width="700px">
 </picture>
 
 
-#### Valores [value]
-Um valor numérico. O Ubidots aceita número de ponto flutuante de até 16 casas decimais.
+Note que o mesmo par de fios SDA e SCL é usado para conectar todos os sensores. Não pode haver inversão desses pinos. Se isso acontecer, toda a comunicação será interrompida. A função de cada pino é a seguinte:
 
-{"valor" : 34.87654974}
+- **SDA (Serial Data Line):** Pino para a linha de dados. Este pino é usado para enviar e receber dados.
+- **SCL (Serial Clock Line):** Pino para a linha de clock. Este pino é usado para sincronizar a transferência de dados entre dispositivos.
 
-#### Carimbos de Tempo [timestamp]
-
-Um carimbo de tempo é uma maneira de rastrear o tempo como um total contínuo de segundos. Esta contagem começou no Unix Epoch em 1º de janeiro de 1970, no UTC. Portanto, o carimbo de tempo Unix é meramente o número de segundos entre uma data específica e o Unix Epoch. Por favor, tenha em mente que ao enviar dados para o Ubidots, você deve definir o carimbo de tempo em milissegundos. Além disso, se você recuperar o carimbo de tempo de um ponto, este estará em milissegundos.
-
-"carimbo de tempo" : 1537453824000
-
-O carimbo de tempo acima corresponde a quinta-feira, 20 de setembro de 2018, às 14:30:24.
-
-DICA PROFISSIONAL: Uma ferramenta útil para converter entre carimbos de tempo Unix e datas legíveis por humanos é o Epoch Converter.
-
-#### Contexto [context]
-
-Valores numéricos não são o único tipo de dado suportado. Você também pode armazenar tipos de dados de string ou char no que chamamos de contexto. O contexto é um objeto de chave-valor que permite armazenar não apenas valores numéricos, mas também valores de string. Um exemplo de uso do contexto poderia ser:
-
-"contexto" : {"status" : "ligado", "clima" : "ensolarado"}
-
-O contexto é comumente usado para armazenar as coordenadas de latitude e longitude do seu dispositivo para casos de uso de GPS/rastreamento. Todos os mapas do Ubidots usam as chaves lat e lng do contexto de um ponto para extrair as coordenadas do seu dispositivo. Dessa forma, você só precisa enviar um único ponto com os valores das coordenadas no contexto da variável para plotar um mapa, em vez de enviar separadamente tanto a latitude quanto a longitude em duas variáveis diferentes. Abaixo, você pode encontrar um contexto típico com valores de coordenadas:
-
-"contexto" : {"lat":-6.2, "lng":75.4, "clima" : "ensolarado"}
-
-Observe que você pode misturar tanto valores de string quanto numéricos no contexto. Se sua aplicação for para fins de geo-localização, certifique-se de que as coordenadas estejam definidas em graus decimais.
-
-5. **Validação do Token:**
-   - Cada solicitação de dados enviada pelo dispositivo inclui o token de acesso associado ao seu projeto Ubidots. Esse token é validado pela plataforma para garantir que a solicitação seja legítima e autorizada.
-
-6. **Armazenamento dos Dados:**
-   - Após a validação do token, os dados enviados pelo dispositivo são armazenados nos servidores do Ubidots. Eles podem ser organizados em variáveis específicas, que representam diferentes tipos de dados ou informações do dispositivo.
-
-7. **Processamento e Visualização dos Dados:**
-   - Os dados armazenados podem ser processados e visualizados por meio do painel de controle do Ubidots. Os desenvolvedores podem criar dashboards personalizados para monitorar em tempo real o desempenho de seus dispositivos IoT.
-
-8. **Configuração de Regras e Ações (Opcional):**
-   - O Ubidots oferece recursos avançados, como a configuração de regras e ações automáticas com base nos dados recebidos. Isso permite automatizar respostas a determinados eventos, como alertas ou acionamento de dispositivos.
+Na figura a seguir, é possível entender melhor como um projeto prático pode ser montado:
 
 <picture>
-   <source media="(prefers-color-scheme: light)" srcset="https://github.com/agodoi/m04-semana06/blob/main/imgs/diagrama_blocos.png">
-   <img alt="Família ESP32" src="[YOUR-DEFAULT-IMAGE](https://github.com/agodoi/m04-semana06/blob/main/imgs/diagrama_blocos.png)">
+   <source media="(prefers-color-scheme: light)" srcset="https://github.com/agodoi/m04-semana08/blob/main/imgs/projetoPraticoI2C.png">
+   <img alt="Circuito I2C" src="(https://github.com/agodoi/m04-semana08/blob/main/imgs/projetoPraticoI2C.png) width="100px">
 </picture>
 
-## Parte prática
+Veja que o ESP32 já possui os pinos SDA e SCL prontos para serem utilizados. Evite nomear outros pinos como SDA e SCL, pois podem não funcionar adequadamente.
 
-Etapas:
 
-1) Abra sua conta particular e gratuita do [Ubidots Stem](https://ubidots.com/stem). Fique atento que o final da URL tem que ser STEM para ser uma conta de estudante;
-2) Instale a biblioteca Ubidots no Arduino IDE. Puxe os dois arquivos zip [dessa pasta](https://drive.google.com/drive/folders/10FC273CVdW05TD02czb3Ic7egROspJ67?usp=share_link) e adicione na sua IDE;
-3) Faça o [donwload](https://docs.google.com/document/d/16XECwRzPNouLuc8NXMfkkcSZ2op2C6hjdl63yghBveo/edit?usp=sharing) desse exemplo de Liga-Desliga LED e salve no seu computador;
-4) Deixe o seu ESP32 próximo do seu protoboard (ou até afixe seu ESP32 no próprio protoboard) para conectar a um LED externo;
-5) Coloque um resistor de aproximadamente 330 ohms no pino positivo do LED, e no pino negativo do LED, conecte ao GND do ESP32;
-6) Ligue o outro terminal do R no pino D2 do ESP32;
-7) Atualize esses campos do código-fonte da sua forma:
-```
-const char *UBIDOTS_TOKEN = "";  // peque o seu TOKEN da sua conta particular. Vá na sua foto do seu perfil do Ubidots, e clique em "Credenciais da API" e pegue o "Default Token" e cole aqui
-const char *WIFI_SSID = "";      // use o WiFi do seu celular nesse primeiro momento, pois o proxy local pode bloquear seu acesso
-const char *WIFI_PASS = "";      // use a senha senha do roteador do seu celular
-const char *DEVICE_LABEL = "";   // crie um nome qualquer para o seu dispositivo
-const char *VARIABLE_LABEL = ""; // crie um nome qualquer de variável que terá os dados da sua aplicação
+<picture>
+   <source media="(prefers-color-scheme: light)" srcset="https://github.com/agodoi/m04-semana08/blob/main/imgs/ESP32-Pinout.jpg">
+   <img alt="Pinout" src="(https://github.com/agodoi/m04-semana08/blob/main/imgs/ESP32-Pinout.jpg) width="500px">
+</picture>
+
+
+## Quantidade de Dispositivos Suportados
+
+O barramento de endereçamento I2C possui 7 bits. Isso significa que a quantidade teórica de dispositivos suportados é de ```N = 2^7 = 128```. A faixa de endereços é dada na base hexadecimal. Portanto, você poderia (teoricamente) usar números hexadecimais de **00** até **7F**. Contudo, alguns endereços são reservados e fixos, e por isso, a quantidade prática de dispositivos suportados é de até 112. Contudo, você terá um outro ponto de atenção: fonte de alimentação adequada para alimentar tantos sensores.
+
+E ainda, alguns dispositivos I2C já possuem um endereço fixo entre 00 e 7F. Essa fixação é feita pelo fabricante por meio de microjumpers soldados na placa. Então, ao invés de tentar encontrar na sorte de qual endereço tal dispositivo está fixado, use esse código para você varrer os 128 endereços teóricos. Esse código-fonte pergunta ao dispositivo, qual o endereço ele está respondendo. Note que a rotina de varredura conta de 0 a 127, mas o resultado impresso no Monitor Serial da IDE do Arduino é convertido para hexadecimal. Você pode usar endereços de barramento tanto em decimal quanto em hexadecimal.
 
 ```
-8) Grave esse código no seu ESP32;
-9) Vá no seu ambiente Ubidots, e clique em **Dispositivos** e novamente, selecione a opção **Dispositivos**;
-10) Você já verá o label do device que você criou em ```const char *DEVICE_LABEL = ""```;
-11) Clique na variável ```const char *VARIABLE_LABEL = ""``` para ter acesso aos dados chegando, que nesse caso, será **0** ou **1** que indica se o LED está ligado ou desligado;
-12) Associe um widget à essa variável e controle o ligar-desligar do seu LED.
-
-## Comentário do código
-
-```
-const int PUBLISH_FREQUENCY = 1000;    //essa linha é o tempo de atualização do envio do MQTT
-unsigned long timer;
-```
-
-Dentro do Void loop ()... adição do envio da variável e device para o Ubidots para facilitar a configuração da dashboard lá dentro do Ubidots
-```
-if(millis() - timer > PUBLISH_FREQUENCY){
-    
-    ubidots.add(VARIABLE_LABEL, 0);       //essa linha está associando o valor 0 na variável em questão 
-    ubidots.publish(DEVICE_LABEL);        //essa linha publica os dados no protocolo MQTT
-    timer = millis();                     //essa linha atualiza o valor de millis() que é um contato interno do ESP32
+#include <Wire.h>
+ 
+void setup() {
+  Wire.begin();
+  Serial.begin(115200);
+  Serial.println("\nScanner I2C");
+    byte error, address;
+  int nDevices;
+  Serial.println("Varrendo...");
+  nDevices = 0;
+  for(address = 1; address < 127; address++ ) {
+    Wire.beginTransmission(address);
+    error = Wire.endTransmission();
+    if (error == 0) {
+      Serial.print("Dispositivo I2C encontrado no endereço 0x");
+      if (address<16) {
+        Serial.print("0");
+      }
+      Serial.println(address,HEX);
+      nDevices++;
+    }
+    else if (error==4) {
+      Serial.print("Erro desconhecido no endereço 0x");
+      if (address<16) {
+        Serial.print("0");
+      }
+      Serial.println(address,HEX);
+    }    
+  }
+  if (nDevices == 0) {
+    Serial.println("Nenhum dispositivo I2C encontrado\n");
+  }
+  else {
+    Serial.println("pronto\n");
+  }
+  delay(5000);  
+  Serial.print("Dispositivos I2C encontrados:");
+  Serial.println(nDevices); 
+}
+ 
+void loop() {
+      
 }
 ```
 
-## Onde se  publica as variáveis e seus valores usando MQTT?
+## Comunicação I2C:
 
-ubidots.add(PUBLISH_VARIABLE_LABEL, value); → manda a variável
+A comunicação I2C é iniciada pelo mestre (ESP32) e pode envolver um ou mais dispositivos escravos. A comunicação consiste em transferências de dados em bytes. O mestre envia um endereço de dispositivo seguido por dados ou recebe dados do dispositivo escravo. **Você pode usar endereços na base decimal (0 até 127) ou hexadecimal (x00 até x7F)**.
 
-ubidots.publish(PUBLISH_DEVICE_LABEL); → manda o device
+A frequência padrão de transferência de dados é de 100kHz, mas pode chegar a 5MHz.
 
-Para vários sensores, como publicar? Simples, adicione um par de linhas para cada sensor:
+A vantagem de usar a comunicação I2C é facilidade e simplicidade da pinagem. O código-fonte é relativamente simples para extrair dados dos sensores.
 
-ubidots.add(PUBLISH_VARIABLE_LABEL1, value1);
+## Cabeçalho do I2C
 
-ubidots.publish(PUBLISH_DEVICE_LABEL1);
+A figura a seguir mostra como o cabeçalho do I2C é organizado. Note que possui os 7 bits do endereçamento e na sequência, 8 bits de dados. É nesses campo de dados que os valores do sensor são transferidos ao ESP32.
 
-ubidots.add(PUBLISH_VARIABLE_LABEL2, value2);
+<picture>
+   <source media="(prefers-color-scheme: light)" srcset="https://github.com/agodoi/m04-semana08/blob/main/imgs/I2C_Basic_Address_and_Data_Frames.jpg">
+   <img alt="Cabeçalho I2C" src="(https://github.com/agodoi/m04-semana08/blob/main/imgs/I2C_Basic_Address_and_Data_Frames.jpg)">
+</picture>
 
-ubidots.publish(PUBLISH_DEVICE_LABEL2);
+## Documentação Oficial I2C
 
-… e assim quantos sensores existirem no seu projeto
+Esse link está a documentação oficial da fabricante do ESP32, chamada Espressif.
 
-## Referência da Prática
+[Documentação](https://espressif-docs.readthedocs-hosted.com/projects/arduino-esp32/en/latest/api/i2c.html)
 
-[Referência](https://help.ubidots.com/en/articles/748067-connect-an-esp32-devkitc-to-ubidots-over-mqtt?_gl=1*1weeu9s*_ga*NTM1ODIzMjQzLjE2NzMyNjQ2NjY.*_ga_VEME7QQ5EZ*MTY4NDc2MzgxOC40OC4xLjE2ODQ3NjYwMTQuNTMuMC4w)
+### Configuração do Barramento I2C:
 
-## Conclusões sobre o MQTT
+Para usar o I2C no ESP32, é necessário inicializar e configurar o barramento. A biblioteca mais usada para o I2C chama-se **Wire.h**.
 
-Cada grupo deve descrecer sobre o que aprendeu ou entendeu nessa prática.
+```
+#include <Wire.h>
 
-[Clique aqui](https://jamboard.google.com/d/1DeO6qMXhEGPfSgDyyLa0RFzKe3BcfY5c9m2odPYT3j4/edit?usp=sharing) e deixe sua conclusão em 1 ou 2 post-it no Jamboard, que ele será lido hoje.
+void setup() {
+  Wire.begin();          // Inicializa o barramento I2C
+  Serial.begin(115200);  // Inicializa a comunicação UART, que nesse caso, ocorre pelo cabo USB.
+}
 
-## Conceitos sobre o dBm
+void loop() {
+  // Seu código aqui
+}
+```
 
-O dB é um parâmetro de medição de intensidade de um sinal qualquer. Lembrando que potência é dado em Watt. 
+#### Enviando dados para um dispositivo escravo:
 
-d → dez
+```
+#include <Wire.h>
 
-B → Bell → que veio de Alexandre Graham Bell (inventor do telefone fixo)
+void setup() {
+  Wire.begin();
+  Serial.begin(115200);
+}
 
-m → é de milésimo de dB (é opcional)
+void loop() {
+  Wire.beginTransmission(8); // 8 é o endereço do dispositivo escravo
+  Wire.write(42);            // Dado a ser enviado
+  Wire.endTransmission();
+  delay(500);
+}
+```
 
-## Equação do dB
+#### Recebendo dados de um dispositivo escravo:
 
-Equação do dB = 10 . log (P_desejado / P_referência) 
+```
+#include <Wire.h>
 
-Note que esse número dB está na escala logarítmica;
+void setup() {
+  Wire.begin();
+  Serial.begin(115200);
+}
 
-Portanto, dB é um valor referencial, isto é, P_desejado está comparável a um outro número (P_referência)
+void loop() {
+  Wire.requestFrom(8, 6); // Solicita 6 bytes do dispositivo escravo com endereço 8
+  while (Wire.available()) {
+    char c = Wire.read(); // Lê os dados recebidos
+    Serial.print(c);
+  }
+  delay(500);
+}
+```
 
-Quais valores usados para P_ref? → 1W ou 1mW
+## Ideias de aprimoramento
 
-Exemplo:
+O aprimoramento vem com a adição de novas informações ao seu projeto. Tente adicionar sensores que lhe tragam mais insights:
 
-Tenho um sinal de WiFi chegando no meu ESP32 de intensidade de -10dBW
+- De barreira por infravermelho que conta acessos de pessoas ou registro de pessoas no local
 
-Significa que o sinal se enfraqueceu 10dB em relação ao P_referência de 1W
+- Piezoelétrico que converte vibração mecânica em sinal elétrico
 
-Outro exemplo:
+- De presença por infravermelho que registra pessoas de uma forma mais ampla
 
-Tenho um sinal de WiFi chegando no meu ESP32 de intensidade de -13dBm
+- De toque em maçanetas ou portas usando entradas touch nativas do ESP32
 
-Significa que o sinal se enfraqueceu 13dB em relação ao P_referência de 1mW
+ Locais que podem inserir sensores:
 
-O que você precisa saber para fazer essas contas? Que…
+- Tapetes
+  
+- Sola de sapatos
+
+- Roupas
+
+- Batentes de portas
+
+- Acessórios e ardonos
+
+- Relógios
+
+- Capinhas de celular
+
+- Medidor de nível do óleo
+
+- No interruptor da lâmpada do local
+
+- Botão de comando da prensa
+
+## O que é um relé?
+
+Um relé é um dispositivo eletromecânico que utiliza um eletroímã para controlar um ou mais contatos elétricos. Sua principal função é abrir ou fechar circuitos elétricos, permitindo o controle de dispositivos de alta potência por meio de sinais elétricos de baixa potência. Vamos explorar o funcionamento de um relé em detalhes:
+
+### Componentes de um Relé:
+
+1. **Eletroímã (Bobina):**
+   - O coração do relé é a bobina, uma espira de fio condutor. Quando uma corrente elétrica passa pela bobina, cria um campo magnético em torno dela.
+
+2. **Contatos (Comutadores):**
+   - Os relés têm contatos móveis que podem estar em uma de duas posições: normalmente abertos (NA) ou normalmente fechados (NF). Os contatos normalmente abertos estão abertos quando a bobina não está energizada, e os contatos normalmente fechados estão fechados quando a bobina não está energizada.
+
+3. **Mola de Retorno:**
+   - Para garantir a comutação rápida dos contatos, um relé geralmente possui uma mola de retorno que retorna os contatos à sua posição original quando a bobina é desenergizada.
+
+4. **Armatura (Mecanismo de Comutação):**
+   - A armatura é uma peça móvel que é atraída ou repelida pelo campo magnético gerado pela bobina. A armatura é conectada aos contatos móveis.
+
+### Funcionamento Básico:
+
+1. **Desenergizado (Repouso):**
+   - Quando a bobina não está energizada, a armatura é mantida em sua posição original pela mola de retorno. Nessa situação, os contatos podem ser normalmente abertos (NA) ou normalmente fechados (NF) dependendo do tipo de relé.
+
+2. **Energizado:**
+   - Quando uma corrente elétrica é aplicada à bobina, ela gera um campo magnético que atrai a armatura. A armatura é puxada para a bobina contra a força da mola de retorno.
+
+3. **Comutação dos Contatos:**
+   - A movimentação da armatura causa a comutação dos contatos. Se os contatos estavam normalmente abertos, agora eles se fecham; se estavam normalmente fechados, agora eles se abrem.
+
+4. **Desenergização:**
+   - Quando a corrente é removida da bobina, a mola de retorno retorna a armatura à sua posição original. Os contatos retornam à sua condição normal (normalmente abertos ou normalmente fechados).
+
+### Diagrama Esquemático:
+
+Aqui está um diagrama esquemático simplificado para ajudar a visualizar o funcionamento:
+
+<picture>
+   <source media="(prefers-color-scheme: light)" srcset="https://github.com/agodoi/m04-semana08/blob/main/imgs/diagrama_rele.png">
+   <img alt="Diagrama Rele" src="(https://github.com/agodoi/m04-semana08/blob/main/imgs/diagrama_rele.png) width="100px">
+</picture>
+
+1. **Bobina (Circuito de Controle):**
+   - O símbolo da bobina representa o circuito de controle que é conectado à fonte de alimentação.
+
+2. **Contatos (Circuito Controlado):**
+   - Os contatos NA (normalmente abertos) e NF (normalmente fechados) representam os circuitos controlados pelo relé.
+
+### Imagem do Interior de um Relé:
+
+[Interior de um Relé](https://en.m.wikipedia.org/wiki/File:Relay_principle_horizontal_new.gif)
+
+1. **Bobina (Parte Superior):**
+   - A bobina está localizada na parte superior e é representada pela espira de fio.
+
+2. **Armatura (Peça Móvel):**
+   - A armatura é a peça móvel que se move quando a bobina é energizada.
+
+3. **Contatos (Parte Inferior):**
+   - Os contatos móveis estão na parte inferior e são comutados pela armatura.
+
+Este é um resumo geral do funcionamento de um relé. A complexidade pode variar dependendo do tipo específico de relé (por exemplo, relé eletromagnético, relé de estado sólido), mas os princípios básicos permanecem os mesmos.
+
+Os campos vetoriais são uma ferramenta matemática usada para descrever o comportamento de quantidades vetoriais em diferentes pontos do espaço. Embora o funcionamento específico de um relé não seja geralmente descrito usando campos vetoriais, podemos fazer uma analogia simplificada para ajudar a entender como a energia eletromagnética age sobre a armatura do relé.
+
+## Como energizar um rele?
+
+Para energnizar um relé, simples use o comando ```digitalWrite(pinoRele,LOW)``` ou ```digitalWrite(pinoRele,HIGH)```. O mais comum é o ```LOW```.
+
+Veja um exemplo:
+
+```
+// Define os pinos utilizados
+const int botaoPin = 2;  // Pino digital conectado ao botão
+const int relePin = 3;   // Pino digital conectado ao relé
+
+void setup() {
+  // Configuração dos pinos
+  pinMode(botaoPin, INPUT_PULLUP); // Configura o pino do botão como entrada com pull-up interno
+  pinMode(relePin, OUTPUT);         // Configura o pino do relé como saída
+  digitalWrite(relePin, HIGH;      // Inicializa o relé como desativado
+}
+
+void loop() {
+  // Verifica se o botão foi pressionado
+  if (digitalRead(botaoPin) == LOW) {
+    // Se o botão foi pressionado, ativa o relé
+    digitalWrite(relePin, LOW);
+    delay(500); // Adiciona um atraso para evitar ativação repetida imediata (debounce)
+    
+    // Aguarda até que o botão seja liberado antes de desativar o relé
+    while (digitalRead(botaoPin) == HIGH) {
+      delay(10); // Debounce
+    }
+    
+    // Desativa o relé
+    digitalWrite(relePin, HIGH);
+  }
+}
+```
+
+### Análise do Funcionamento do Relé com Conceitos Matemáticos:
+
+1. **Campo Magnético (B):**
+   - A corrente elétrica que flui através da bobina do relé gera um campo magnético (B). Podemos considerar o campo magnético como um vetor que possui magnitude e direção em cada ponto ao redor da bobina.
+
+2. **Armatura como Vetor Posição (r):**
+   - Podemos associar a armatura do relé com um vetor posição (r), representando a posição da armatura no espaço. À medida que a armatura se move, podemos considerar sua posição em relação à bobina.
+
+3. **Força Magnética (F):**
+   - A armatura, que atua como uma carga magnética, experimenta uma força (F) devido à interação com o campo magnético. A relação entre o campo magnético, a corrente e a força é descrita pela Lei de Ampère.
+
+4. **Equação Vetorial:**
+   - Podemos expressar essa interação em termos de uma equação vetorial, onde a força magnética (F) é proporcional ao produto vetorial da corrente (I) e do vetor posição (r), de acordo com a regra da mão direita.
+
+5. **Movimento da Armatura:**
+   - Quando a corrente é aplicada à bobina, o campo magnético resultante exerce uma força sobre a armatura, movendo-a na direção determinada pelo vetor campo magnético.
+
+6. **Comutação dos Contatos:**
+   - O movimento da armatura causa a comutação dos contatos. Se considerarmos a posição da armatura como um parâmetro de controle, podemos relacionar seu movimento aos estados dos contatos (abertos ou fechados).
+
+Essa abordagem é uma simplificação e não representa um modelo matemático rigoroso, mas pode ajudar a visualizar o funcionamento do relé em termos de campos vetoriais. Em termos práticos, os engenheiros elétricos geralmente usam equações específicas para descrever o comportamento eletromagnético, e os campos vetoriais são ferramentas poderosas para análise em sistemas mais complexos.
 
 
-1dB		→ ganho de intensidade de  1,25 (é o mesmo que multiplicar por 1,25 na escala linear)
+## Quais cuidados ao usar relé?
 
--1dB 		→perda de intensidade de 0,79 (é o mesmo que multiplicar por 0,79 na escala linear)
+O relé um dispositivo que usa o campo magnético formado em sua bobina interna para atrair uma pequena chapinha de metal.
 
-3dB		→ ganho de 1,995
+Ao utilizar relés em projetos com o ESP32, é importante ter alguns cuidados para garantir o bom funcionamento, a segurança e a confiabilidade do sistema. Aqui estão alguns cuidados a serem considerados:
 
--3dB		→ perda na escala de 0,5
+1. **Proteção contra Sobrecarga e Transientes:**
+   - Utilize diodos em paralelo aos contatos do relé para proteger contra picos de tensão gerados pela desenergização do relé. Isso ajuda a prevenir danos aos pinos de saída do ESP32.
 
-10dB		→ ganho de 10x
+2. **Corrente e Tensão Nominal:**
+   - Verifique se a corrente e a tensão nominais do relé estão dentro das especificações suportadas pelo ESP32 e pela fonte de alimentação.
 
--10dB	→ perda na escala de 0,1
+3. **Alimentação Isolada:**
+   - Considere alimentar o relé com uma fonte de alimentação isolada para evitar interferências elétricas que possam afetar a estabilidade do ESP32.
 
-### Exemplos práticos
+4. **Capacidade do Pino de Saída:**
+   - Certifique-se de que os pinos de saída do ESP32 possuem capacidade de corrente suficiente para acionar o relé. Se necessário, utilize um driver de transistores para aumentar a corrente disponível.
 
-Um sinal está com 10dBm na entrada da minha antena. Quanto isso vale na escala linear comparado com 1mW, ou seja, quanto vale Pdesejado?
+5. **Proteção Eletromagnética (EMI/RFI):**
+   - Adote práticas de design para minimizar interferências eletromagnéticas que podem afetar a operação do ESP32.
 
-X 		= 10 . log (Pd / 1mW)
+6. **Proteção contra Curto-Circuito:**
+   - Inclua fusíveis ou PTCs (coeficiente de temperatura positivo) para proteger o circuito contra curtos-circuitos no lado do relé.
 
-10dBm 	= 10. log (Pd / 1mW)
+7. **Proteção Térmica:**
+   - Considere a dissipação de calor do relé e adote medidas para evitar o superaquecimento. Isso pode incluir dissipadores de calor ou escolha de relés de estado sólido que geram menos calor.
 
-10dBm = 10. log (Pd / 1mW)		→ você pode cancelar os milis envolvidos
+8. **Evite Correntes Elevadas no Controle:**
+   - Evite correntes excessivas nos pinos de controle do relé. Utilize resistores de base ou optoacopladores para isolar o circuito de controle do relé do circuito de controle do ESP32.
 
-10/10 =     log (Pd)
+9. **Proteção contra Reversão de Polaridade:**
+    - Implemente proteção contra inversão de polaridade na fonte de alimentação do sistema para evitar danos aos componentes.
 
-1     =     log (Pd)
-
-10^1  =	         Pd
-
-Pd = 10mW	→ lembre-se que estava em mW no enunciado, então vc corta o mili nas contas, mas retorne ele no resultado
-
-#### Agora tente resolver esses valores
-
-a) Converta 13dBm para escala linear
-
-b) Converta 17dBm para escala linear
-
-c) Converta -41dBm para escala linear
-
-d) Converta -35dBm para escala linear
-
+10. **Testes e Monitoramento:**
+    - Realize testes extensivos para garantir a confiabilidade do sistema. Monitore o comportamento do sistema em diferentes condições de carga.
