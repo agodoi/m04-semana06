@@ -382,3 +382,122 @@ Ao utilizar relés em projetos com o ESP32, é importante ter alguns cuidados pa
 
 7. **Testes e Monitoramento:**
     - Realize testes extensivos para garantir a confiabilidade do sistema. Monitore o comportamento do sistema em diferentes condições de carga.
+
+## HiveMQ
+
+- **Definição**: O MQTT (Message Queuing Telemetry Transport) é um protocolo de comunicação leve projetado para dispositivos IoT, como o ESP32, que lida com comunicações eficientes e de baixa latência.
+- **Arquitetura**: O protocolo segue um modelo cliente/servidor:
+  - **Broker**: Recebe e distribui mensagens.
+  - **Clientes**: Podem ser dispositivos que publicam ou se inscrevem em tópicos específicos. O ESP32 será um desses clientes. Mas ele também pode ser um assinante de tópicos, como vimos no projeto do Ubidots controlando um LED.
+
+#### **2. O que é o HiveMQ?**
+- **HiveMQ**: Um broker MQTT popular que permite gerenciar conexões de dispositivos IoT com eficiência. Ele oferece uma versão em nuvem que facilita a configuração de testes.
+
+#### **3. Configurando o HiveMQ Cloud**
+- **Passo 1**: Acesse [HiveMQ Cloud](https://www.hivemq.com/mqtt-cloud-broker/) e crie uma conta gratuita (se ainda não tiver).
+- **Passo 2**: Após o login, você terá acesso ao painel que fornecerá informações do broker, incluindo:
+  - **Host** (endereço do servidor).
+  - **Porta** (1883 para conexões não seguras ou 8883 para seguras).
+  - **Usuário e Senha** (caso necessário).
+
+#### **4. Configuração do ESP32 para MQTT**
+- **Requisitos**:
+  - Arduino IDE instalada.
+  - Biblioteca `PubSubClient` para comunicação MQTT (pode ser instalada através do Gerenciador de Bibliotecas da IDE Arduino).
+
+#### **5. Exemplo de Código para o ESP32**
+- **Passo 1**: Conecte o ESP32 ao Wi-Fi e ao broker HiveMQ usando a biblioteca `PubSubClient`.
+  
+  ```cpp
+  #include <WiFi.h>
+  #include <PubSubClient.h>
+
+  // Configuração Wi-Fi
+  const char* ssid = "SEU_SSID";
+  const char* password = "SUA_SENHA";
+
+// Configuração do Broker MQTT (ajuste para os valores fornecidos pelo HiveMQ)
+  const char* mqttServer = "broker-endereco-hivemq";
+  const int mqttPort = 1883; // Ou 8883 para conexões seguras
+  const char* mqttUser = "usuario"; // Opcional
+  const char* mqttPassword = "senha"; // Opcional
+
+  WiFiClient espClient;
+  PubSubClient client(espClient);
+
+  void setup() {
+      Serial.begin(115200);
+      WiFi.begin(ssid, password);
+      while (WiFi.status() != WL_CONNECTED) {
+          delay(500);
+          Serial.println("Conectando ao Wi-Fi...");
+      }
+      Serial.println("Wi-Fi conectado!");
+
+      client.setServer(mqttServer, mqttPort);
+      client.setCallback(callback);
+
+      while (!client.connected()) {
+          Serial.println("Conectando ao broker MQTT...");
+          if (client.connect("ESP32Client", mqttUser, mqttPassword)) {
+              Serial.println("Conectado!");
+          } else {
+              Serial.print("Falha de conexão. Código: ");
+              Serial.print(client.state());
+              delay(2000);
+          }
+      }
+      // Inscrever-se em um tópico
+      client.subscribe("meutopico/teste");
+  }
+
+  void callback(char* topic, byte* payload, unsigned int length) {
+      Serial.print("Mensagem recebida no tópico: ");
+      Serial.println(topic);
+      Serial.print("Mensagem: ");
+      for (int i = 0; i < length; i++) {
+          Serial.print((char)payload[i]);
+      }
+      Serial.println();
+  }
+
+  void loop() {
+      if (!client.connected()) {
+          // Reconecte-se, se necessário
+          while (!client.connected()) {
+              client.connect("ESP32Client", mqttUser, mqttPassword);
+          }
+      }
+      client.loop();
+
+      // Publicando mensagens de exemplo
+      client.publish("meutopico/teste", "Olá do ESP32!");
+      delay(2000); // Aguarda 2 segundos antes do próximo envio
+  }
+  ```
+
+#### **6. Passo a Passo para Configuração e Execução**
+- **Conectar ESP32 ao Wi-Fi**: Garanta que `ssid` e `password` estão corretos.
+- **Configurar Credenciais do Broker MQTT**: Utilize as informações fornecidas pelo HiveMQ (endereço do broker, porta, usuário e senha).
+- **Subscribing (Assinando)**: O ESP32 se inscreverá para receber mensagens de um tópico (`meutopico/teste`).
+- **Publishing (Publicando)**: O ESP32 publicará mensagens periodicamente.
+
+#### **7. Testando a Comunicação**
+- Utilize uma ferramenta como o [MQTT Explorer](https://mqtt-explorer.com/) para visualizar as mensagens publicadas e testá-las em tempo real.
+- Verifique se o ESP32 está recebendo mensagens do tópico no qual está inscrito.
+
+#### **8. Segurança (Opcional)**
+- Para conexões seguras, configure a porta 8883 e ajuste as opções de TLS na biblioteca `PubSubClient` (incluindo certificados, se necessário).
+
+---
+
+### **Conclusão e Prática Final**
+- **Objetivo Prático**: Configure um projeto usando ESP32 para enviar e receber dados de sensores via MQTT com o HiveMQ Cloud.
+- **Desafios**:
+  - Alterar tópicos e mensagens publicadas.
+  - Integrar diferentes sensores e publicá-los no broker.
+  - Testar a conexão em ambientes distintos (Wi-Fi local, diferentes redes).
+
+--- 
+
+**Agora, você está pronto para utilizar o ESP32 com o HiveMQ e explorar a conectividade em projetos de IoT!**
