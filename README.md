@@ -408,7 +408,7 @@ Ao utilizar relés em projetos com o ESP32, é importante ter alguns cuidados pa
 #### **5. Exemplo de Código para o ESP32**
 - **Passo 1**: Conecte o ESP32 ao Wi-Fi e ao broker HiveMQ usando a biblioteca `PubSubClient`.
   
-  ```cpp
+  ```
   #include <WiFi.h>
   #include <PubSubClient.h>
 
@@ -476,28 +476,34 @@ Ao utilizar relés em projetos com o ESP32, é importante ter alguns cuidados pa
   }
   ```
 
-#### **6. Passo a Passo para Configuração e Execução**
+#### 6. Passo a Passo para Configuração e Execução
 - **Conectar ESP32 ao Wi-Fi**: Garanta que `ssid` e `password` estão corretos.
 - **Configurar Credenciais do Broker MQTT**: Utilize as informações fornecidas pelo HiveMQ (endereço do broker, porta, usuário e senha).
 - **Subscribing (Assinando)**: O ESP32 se inscreverá para receber mensagens de um tópico (`meutopico/teste`).
 - **Publishing (Publicando)**: O ESP32 publicará mensagens periodicamente.
 
-#### **7. Testando a Comunicação**
+#### 7. Testando a Comunicação
 - Utilize uma ferramenta como o [MQTT Explorer](https://mqtt-explorer.com/) para visualizar as mensagens publicadas e testá-las em tempo real.
 - Verifique se o ESP32 está recebendo mensagens do tópico no qual está inscrito.
 
-#### **8. Segurança (Opcional)**
+#### 8. Segurança (Opcional)
 - Para conexões seguras, configure a porta 8883 e ajuste as opções de TLS na biblioteca `PubSubClient` (incluindo certificados, se necessário).
 
 ---
 
-### **Conclusão e Prática Final**
+### Conclusão e Prática Final
 - **Objetivo Prático**: Configure um projeto usando ESP32 para enviar e receber dados de sensores via MQTT com o HiveMQ Cloud.
 - **Desafios**:
   - Alterar tópicos e mensagens publicadas.
   - Integrar diferentes sensores e publicá-los no broker.
   - Testar a conexão em ambientes distintos (Wi-Fi local, diferentes redes).
 
---- 
+---
 
-**Agora, você está pronto para utilizar o ESP32 com o HiveMQ e explorar a conectividade em projetos de IoT!**
+## Comparação Geral:
+
+* Foco de Uso: o HiveMQ é ideal para empresas que necessitam de um broker MQTT escalável e desejam gerenciar sua própria infraestrutura. Já o Ubidots é mais adequado para desenvolvedores que buscam uma plataforma completa para prototipagem e implementação rápida de soluções IoT.
+
+* Complexidade: o HiveMQ pode exigir mais conhecimento técnico para configuração e manutenção, enquanto o Ubidots oferece uma interface mais amigável e pronta para uso.
+
+* Custo: o investimento no HiveMQ pode ser menor, mas precisará de mais de mão-de-obra de DEV para manter de pé a infraestrutura e possíveis licenças, enquanto o Ubidots oferece planos baseados em assinatura que podem ser mais caros, porém encurta a etapa de implantação.
