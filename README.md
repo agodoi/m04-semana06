@@ -393,6 +393,10 @@ Ao utilizar relés em projetos com o ESP32, é importante ter alguns cuidados pa
 #### **2. O que é o HiveMQ?**
 - **HiveMQ**: Um broker MQTT popular que permite gerenciar conexões de dispositivos IoT com eficiência. Ele oferece uma versão em nuvem que facilita a configuração de testes.
 
+#### Documentação completa HiveMQ para criar o primeiro device IoT
+
+![Documentação](https://docs.hivemq.com/hivemq-cloud/quick-start-guide.html#create-credentials)
+
 #### **3. Configurando o HiveMQ Cloud**
 - **Passo 1**: Acesse [HiveMQ Cloud](https://www.hivemq.com/mqtt-cloud-broker/) e crie uma conta gratuita (se ainda não tiver).
 - **Passo 2**: Após o login, você terá acesso ao painel que fornecerá informações do broker, incluindo:
