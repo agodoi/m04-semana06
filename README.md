@@ -227,7 +227,15 @@ O aprimoramento vem com a adição de novas informações ao seu projeto. Tente 
 
 ## O que é um relé?
 
-Um relé é um dispositivo eletromecânico que utiliza um eletroímã para controlar um ou mais contatos elétricos. Sua principal função é abrir ou fechar circuitos elétricos, permitindo o controle de dispositivos de alta potência por meio de sinais elétricos de baixa potência. Vamos explorar o funcionamento de um relé em detalhes:
+Um relé é um dispositivo eletromecânico que utiliza um eletroímã para controlar um ou mais contatos elétricos. Sua principal função é abrir ou fechar circuitos elétricos, permitindo o controle de dispositivos de alta potência por meio de sinais elétricos de baixa potência. 
+
+
+## Para que serve no seu projeto?
+
+Tanto no compressor de ar quanto na prensa, o relé serve para cortar a energia elétrica em casos de alarmes críticos, além de ativar uma sirene ou um giroflex para chamar a atenção.
+O relé pode servir como uma chave liga-desliga que só liga se todos os sensores e o algoritmo **autorizar**.
+
+Vamos explorar o funcionamento de um relé em detalhes:
 
 ### Componentes de um Relé:
 
