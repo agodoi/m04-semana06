@@ -297,7 +297,7 @@ Este é um resumo geral do funcionamento de um relé. A complexidade pode variar
 
 Os campos vetoriais são uma ferramenta matemática usada para descrever o comportamento de quantidades vetoriais em diferentes pontos do espaço. Embora o funcionamento específico de um relé não seja geralmente descrito usando campos vetoriais, podemos fazer uma analogia simplificada para ajudar a entender como a energia eletromagnética age sobre a armatura do relé.
 
-## Como energizar um rele?
+## Como energizar um relé?
 
 Para energnizar um relé, simples use o comando ```digitalWrite(pinoRele,LOW)``` ou ```digitalWrite(pinoRele,HIGH)```. O mais comum é o ```LOW```.
 
