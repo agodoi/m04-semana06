@@ -395,7 +395,7 @@ Ao utilizar relés em projetos com o ESP32, é importante ter alguns cuidados pa
 
 #### Documentação completa HiveMQ para criar o primeiro device IoT
 
-![Documentação](https://docs.hivemq.com/hivemq-cloud/quick-start-guide.html#create-credentials) 
+[Documentação](https://docs.hivemq.com/hivemq-cloud/quick-start-guide.html#create-credentials) 
 
 #### **3. Configurando o HiveMQ Cloud**
 - **Passo 1**: Acesse [HiveMQ Cloud](https://www.hivemq.com/mqtt-cloud-broker/) e crie uma conta gratuita (se ainda não tiver).
@@ -510,4 +510,9 @@ void loop() {
 
 * Complexidade: o HiveMQ pode exigir mais conhecimento técnico para configuração e manutenção, enquanto o Ubidots oferece uma interface mais amigável e pronta para uso.
 
-* Custo: o investimento no HiveMQ pode ser menor, mas precisará de mais de mão-de-obra de DEV para manter de pé a infraestrutura e possíveis licenças, enquanto o Ubidots oferece planos baseados em assinatura que podem ser mais caros, porém encurta a etapa de implantação.
+* Custo: o investimento no HiveMQ pode ser maior (manutenção da nuvem) e precisará de mais de mão-de-obra de DEV para manter de pé a infraestrutura, além de criar o front-end, enquanto o Ubidots oferece planos baseados em assinatura que podem compensar mais laém de encurta a etapa de implantação.
+
+## Código Exemplo Wokwi HiveMQ ESP32
+
+[Exemplo](https://wokwi.com/projects/322524997423727188)
+
