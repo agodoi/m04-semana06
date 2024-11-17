@@ -408,73 +408,73 @@ Ao utilizar relés em projetos com o ESP32, é importante ter alguns cuidados pa
 #### **5. Exemplo de Código para o ESP32**
 - **Passo 1**: Conecte o ESP32 ao Wi-Fi e ao broker HiveMQ usando a biblioteca ```PubSubClient```.
   
-  ```
-  #include <WiFi.h>
-  #include <PubSubClient.h>
+```
+#include <WiFi.h>
+#include <PubSubClient.h>
 
-  // Configuração Wi-Fi
-  const char* ssid = "SEU_SSID";
-  const char* password = "SUA_SENHA";
+// Configuração Wi-Fi
+const char* ssid = "SEU_SSID";
+const char* password = "SUA_SENHA";
 
 // Configuração do Broker MQTT (ajuste para os valores fornecidos pelo HiveMQ)
-  const char* mqttServer = "broker-endereco-hivemq";
-  const int mqttPort = 1883; // Ou 8883 para conexões seguras
-  const char* mqttUser = "usuario"; // Opcional
-  const char* mqttPassword = "senha"; // Opcional
+const char* mqttServer = "broker-endereco-hivemq";
+const int mqttPort = 1883; // Ou 8883 para conexões seguras
+const char* mqttUser = "usuario"; // Opcional
+const char* mqttPassword = "senha"; // Opcional
 
-  WiFiClient espClient;
-  PubSubClient client(espClient);
+WiFiClient espClient;
+PubSubClient client(espClient);
 
-  void setup() {
-      Serial.begin(115200);
-      WiFi.begin(ssid, password);
-      while (WiFi.status() != WL_CONNECTED) {
-          delay(500);
-          Serial.println("Conectando ao Wi-Fi...");
-      }
-      Serial.println("Wi-Fi conectado!");
+void setup() {
+   Serial.begin(115200);
+   WiFi.begin(ssid, password);
+   while (WiFi.status() != WL_CONNECTED) {
+       delay(500);
+       Serial.println("Conectando ao Wi-Fi...");
+   }
+   Serial.println("Wi-Fi conectado!");
 
-      client.setServer(mqttServer, mqttPort);
-      client.setCallback(callback);
+   client.setServer(mqttServer, mqttPort);
+   client.setCallback(callback);
 
-      while (!client.connected()) {
-          Serial.println("Conectando ao broker MQTT...");
-          if (client.connect("ESP32Client", mqttUser, mqttPassword)) {
-              Serial.println("Conectado!");
-          } else {
-              Serial.print("Falha de conexão. Código: ");
-              Serial.print(client.state());
-              delay(2000);
-          }
-      }
-      // Inscrever-se em um tópico
-      client.subscribe("meutopico/teste");
-  }
+   while (!client.connected()) {
+       Serial.println("Conectando ao broker MQTT...");
+       if (client.connect("ESP32Client", mqttUser, mqttPassword)) {
+           Serial.println("Conectado!");
+       } else {
+           Serial.print("Falha de conexão. Código: ");
+           Serial.print(client.state());
+           delay(2000);
+       }
+   }
+   // Inscrever-se em um tópico
+   client.subscribe("meutopico/teste");
+}
 
-  void callback(char* topic, byte* payload, unsigned int length) {
-      Serial.print("Mensagem recebida no tópico: ");
-      Serial.println(topic);
-      Serial.print("Mensagem: ");
-      for (int i = 0; i < length; i++) {
-          Serial.print((char)payload[i]);
-      }
-      Serial.println();
-  }
+void callback(char* topic, byte* payload, unsigned int length) {
+   Serial.print("Mensagem recebida no tópico: ");
+   Serial.println(topic);
+   Serial.print("Mensagem: ");
+   for (int i = 0; i < length; i++) {
+       Serial.print((char)payload[i]);
+   }
+   Serial.println();
+}
 
-  void loop() {
-      if (!client.connected()) {
-          // Reconecte-se, se necessário
-          while (!client.connected()) {
-              client.connect("ESP32Client", mqttUser, mqttPassword);
-          }
-      }
-      client.loop();
+void loop() {
+   if (!client.connected()) {
+       // Reconecte-se, se necessário
+       while (!client.connected()) {
+           client.connect("ESP32Client", mqttUser, mqttPassword);
+       }
+   }
+   client.loop();
 
-      // Publicando mensagens de exemplo
-      client.publish("meutopico/teste", "Olá do ESP32!");
-      delay(2000); // Aguarda 2 segundos antes do próximo envio
-  }
-  ```
+   // Publicando mensagens de exemplo
+   client.publish("meutopico/teste", "Olá do ESP32!");
+   delay(2000); // Aguarda 2 segundos antes do próximo envio
+}
+```
 
 #### 6. Passo a Passo para Configuração e Execução
 - **Conectar ESP32 ao Wi-Fi**: Garanta que ```ssid``` e ```password``` estão corretos.
