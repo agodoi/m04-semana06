@@ -233,7 +233,7 @@ Um relé é um dispositivo eletromecânico que utiliza um eletroímã para contr
 ## Para que serve no seu projeto?
 
 Tanto no compressor de ar quanto na prensa, o relé serve para cortar a energia elétrica em casos de alarmes críticos, além de ativar uma sirene ou um giroflex para chamar a atenção.
-O relé pode servir como uma chave liga-desliga que só liga se todos os sensores e o algoritmo **autorizar**.
+O relé pode servir como uma chave liga-desliga que só liga se todos os sensores e o algoritmo **autorizar** o correto funcionamento.
 
 Vamos explorar o funcionamento de um relé em detalhes:
 
@@ -356,20 +356,20 @@ void loop() {
 Essa abordagem é uma simplificação e não representa um modelo matemático rigoroso, mas pode ajudar a visualizar o funcionamento do relé em termos de campos vetoriais. Em termos práticos, os engenheiros elétricos geralmente usam equações específicas para descrever o comportamento eletromagnético, e os campos vetoriais são ferramentas poderosas para análise em sistemas mais complexos.
 
 
-## Quais cuidados ao usar relé?
+## Se for montar sua placa, quais cuidados ao usar relé?
 
 O relé um dispositivo que usa o campo magnético formado em sua bobina interna para atrair uma pequena chapinha de metal.
 
 Ao utilizar relés em projetos com o ESP32, é importante ter alguns cuidados para garantir o bom funcionamento, a segurança e a confiabilidade do sistema. Aqui estão alguns cuidados a serem considerados:
 
 1. **Proteção contra Sobrecarga e Transientes:**
-   - Utilize diodos em paralelo aos contatos do relé para proteger contra picos de tensão gerados pela desenergização do relé. Isso ajuda a prevenir danos aos pinos de saída do ESP32.
+   - Utilize diodos em paralelo aos contatos do relé para proteger contra picos de tensão gerados pela desenergização do relé. Isso ajuda a prevenir danos aos pinos de saída do ESP32. Os módulos azuis de relé que usamos no kit há possuem esse diodo de proteção.
 
 2. **Corrente e Tensão Nominal:**
-   - Verifique se a corrente e a tensão nominais do relé estão dentro das especificações suportadas pelo ESP32 e pela fonte de alimentação.
+   - Verifique se a corrente e a tensão nominais do relé estão dentro das especificações suportadas pela fonte de alimentação.
 
 3. **Alimentação Isolada:**
-   - Considere alimentar o relé com uma fonte de alimentação isolada para evitar interferências elétricas que possam afetar a estabilidade do ESP32.
+   - Considere alimentar o relé com uma fonte de alimentação isolada do ESP32 para evitar interferências elétricas que possam afetar a estabilidade do ESP32.
 
 4. **Capacidade do Pino de Saída:**
    - Certifique-se de que os pinos de saída do ESP32 possuem capacidade de corrente suficiente para acionar o relé. Se necessário, utilize um driver de transistores para aumentar a corrente disponível.
@@ -378,16 +378,7 @@ Ao utilizar relés em projetos com o ESP32, é importante ter alguns cuidados pa
    - Adote práticas de design para minimizar interferências eletromagnéticas que podem afetar a operação do ESP32.
 
 6. **Proteção contra Curto-Circuito:**
-   - Inclua fusíveis ou PTCs (coeficiente de temperatura positivo) para proteger o circuito contra curtos-circuitos no lado do relé.
+   - Inclua acopladores ópticos para integrar a parte do ESP32 com a o relé. Isso garante proteção máxima contra curtos-circuitos que ocorrem no lado do relé e não se propagam para o lado sensível do ESP32.
 
-7. **Proteção Térmica:**
-   - Considere a dissipação de calor do relé e adote medidas para evitar o superaquecimento. Isso pode incluir dissipadores de calor ou escolha de relés de estado sólido que geram menos calor.
-
-8. **Evite Correntes Elevadas no Controle:**
-   - Evite correntes excessivas nos pinos de controle do relé. Utilize resistores de base ou optoacopladores para isolar o circuito de controle do relé do circuito de controle do ESP32.
-
-9. **Proteção contra Reversão de Polaridade:**
-    - Implemente proteção contra inversão de polaridade na fonte de alimentação do sistema para evitar danos aos componentes.
-
-10. **Testes e Monitoramento:**
+7. **Testes e Monitoramento:**
     - Realize testes extensivos para garantir a confiabilidade do sistema. Monitore o comportamento do sistema em diferentes condições de carga.
