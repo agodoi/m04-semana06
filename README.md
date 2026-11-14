@@ -1,4 +1,4 @@
-# Sistema de Disparo de Atuadores
+# Semana 06 — Sistema de disparo de atuadores
 
 Neste encontro, será apresentado como ativar acionadores básicos (linha de força, motores, relés) a partir da resposta de sensores de forma a implementar regras de atuação. Adicionalmente, trataremos no detalhe, como funciona a comunicação I2C.
 
@@ -10,7 +10,7 @@ Neste encontro, será apresentado como ativar acionadores básicos (linha de for
 
 - Microcontroladores
 
-- HiveMQ
+- Broker MQTT local Mosquitto e Node-RED
 
 ## Perguntas que podem impactar o seu projeto:
 
@@ -22,7 +22,7 @@ Neste encontro, será apresentado como ativar acionadores básicos (linha de for
 
 ### (4) Quais os cuidados se você usar relés no seu projeto?
 
-### (5) Vantagens do HiveMQ vs Ubidots
+### (5) Como conectar o acionamento local de um atuador ao monitoramento pelo broker da sala?
 
 https://portal.vidadesilicio.com.br/descobrindo-o-endereco-i2c/
 
@@ -34,10 +34,7 @@ O barramento I2C (Inter-Integrated Circuit) é um protocolo de comunicação ser
 No ESP32, o I2C é implementado por meio de hardware e software. Veja na Fig. 1, como se comporta fisicamente as conexões eletrônica no barramento I2C.
 
 
-<picture>
-   <source media="(prefers-color-scheme: light)" srcset="https://github.com/agodoi/m04-semana08/blob/main/imgs/barramentoI2C.png">
-   <img alt="Barramento I2C" src="(https://github.com/agodoi/m04-semana08/blob/main/imgs/barramentoI2C.png)" width="700px">
-</picture>
+![Barramento I2C](https://github.com/agodoi/m04-semana08/blob/main/imgs/barramentoI2C.png)
 
 
 Note que o mesmo par de fios SDA e SCL é usado para conectar todos os sensores. Não pode haver inversão desses pinos. Se isso acontecer, toda a comunicação será interrompida. A função de cada pino é a seguinte:
@@ -47,88 +44,57 @@ Note que o mesmo par de fios SDA e SCL é usado para conectar todos os sensores.
 
 Na figura a seguir, é possível entender melhor como um projeto prático pode ser montado:
 
-<picture>
-   <source media="(prefers-color-scheme: light)" srcset="https://github.com/agodoi/m04-semana08/blob/main/imgs/projetoPraticoI2C.png">
-   <img alt="Circuito I2C" src="(https://github.com/agodoi/m04-semana08/blob/main/imgs/projetoPraticoI2C.png) width="100px">
-</picture>
+![Circuito I2C](https://github.com/agodoi/m04-semana08/blob/main/imgs/projetoPraticoI2C.png)
 
-Veja que o ESP32 já possui os pinos SDA e SCL prontos para serem utilizados. Evite nomear outros pinos como SDA e SCL, pois podem não funcionar adequadamente.
+Em muitas placas com ESP32, os pinos padrão são SDA no GPIO 21 e SCL no GPIO 22. Os pinos podem variar conforme a placa e ser configurados por software; confirme o modelo e sua pinagem. Use resistores pull-up adequados nas linhas SDA e SCL e confira se os módulos trabalham com níveis lógicos compatíveis com 3,3 V.
 
 
-<picture>
-   <source media="(prefers-color-scheme: light)" srcset="https://github.com/agodoi/m04-semana08/blob/main/imgs/ESP32-Pinout.jpg">
-   <img alt="Pinout" src="(https://github.com/agodoi/m04-semana08/blob/main/imgs/ESP32-Pinout.jpg) width="500px">
-</picture>
+![Pinout](https://github.com/agodoi/m04-semana08/blob/main/imgs/ESP32-Pinout.jpg)
 
 
 ## Quantidade de Dispositivos Suportados
 
-O barramento de endereçamento I2C possui 7 bits. Isso significa que a quantidade teórica de dispositivos suportados é de ```N = 2^7 = 128```. A faixa de endereços é dada na base hexadecimal. Portanto, você poderia (teoricamente) usar números hexadecimais de **00** até **7F**. Contudo, alguns endereços são reservados e fixos, e por isso, a quantidade prática de dispositivos suportados é de até 112. Contudo, você terá um outro ponto de atenção: fonte de alimentação adequada para alimentar tantos sensores.
+No endereçamento I2C de 7 bits há 128 combinações possíveis (`0x00` a `0x7F`). Parte delas é reservada; a faixa de endereços comuns é `0x08` a `0x77`, com 112 endereços possíveis. Isso **não significa que 112 sensores necessariamente funcionarão no mesmo barramento**: considere endereços fixos ou repetidos, capacitância, pull-ups, alimentação, velocidade e características dos módulos. Alguns dispositivos permitem selecionar endereço por pinos ou jumpers; outros precisam de um multiplexador I2C quando há conflito.
 
-E ainda, alguns dispositivos I2C já possuem um endereço fixo entre 00 e 7F. Essa fixação é feita pelo fabricante por meio de microjumpers soldados na placa. Então, ao invés de tentar encontrar na sorte de qual endereço tal dispositivo está fixado, use esse código para você varrer os 128 endereços teóricos. Esse código-fonte pergunta ao dispositivo, qual o endereço ele está respondendo. Note que a rotina de varredura conta de 0 a 127, mas o resultado impresso no Monitor Serial da IDE do Arduino é convertido para hexadecimal. Você pode usar endereços de barramento tanto em decimal quanto em hexadecimal.
+O scanner abaixo procura respostas na faixa comum e mostra o endereço no Monitor Serial. Ele identifica que algum dispositivo respondeu naquele endereço, mas **não identifica o tipo de sensor nem lê seu valor**. Escolha os pinos conforme sua placa e abra o Monitor Serial em 115200 baud.
 
-```
+```cpp
 #include <Wire.h>
- 
+
 void setup() {
-  Wire.begin();
   Serial.begin(115200);
-  Serial.println("\nScanner I2C");
-    byte error, address;
-  int nDevices;
-  Serial.println("Varrendo...");
-  nDevices = 0;
-  for(address = 1; address < 127; address++ ) {
-    Wire.beginTransmission(address);
-    error = Wire.endTransmission();
-    if (error == 0) {
-      Serial.print("Dispositivo I2C encontrado no endereço 0x");
-      if (address<16) {
-        Serial.print("0");
-      }
-      Serial.println(address,HEX);
-      nDevices++;
+  Wire.begin(21, 22); // SDA e SCL comuns no ESP32; confirme sua placa.
+  Serial.println("Scanner I2C: varrendo enderecos...");
+  int encontrados = 0;
+  for (uint8_t endereco = 0x08; endereco <= 0x77; endereco++) {
+    Wire.beginTransmission(endereco);
+    uint8_t resultado = Wire.endTransmission();
+    if (resultado == 0) {
+      Serial.printf("Dispositivo respondeu em 0x%02X\n", endereco);
+      encontrados++;
     }
-    else if (error==4) {
-      Serial.print("Erro desconhecido no endereço 0x");
-      if (address<16) {
-        Serial.print("0");
-      }
-      Serial.println(address,HEX);
-    }    
   }
-  if (nDevices == 0) {
-    Serial.println("Nenhum dispositivo I2C encontrado\n");
-  }
-  else {
-    Serial.println("pronto\n");
-  }
-  delay(5000);  
-  Serial.print("Dispositivos I2C encontrados:");
-  Serial.println(nDevices); 
+  Serial.printf("Total de enderecos com resposta: %d\n", encontrados);
 }
- 
+
 void loop() {
-      
+  // A varredura é realizada uma vez ao iniciar.
 }
 ```
 
 ## Comunicação I2C:
 
-A comunicação I2C é iniciada pelo mestre (ESP32) e pode envolver um ou mais dispositivos escravos. A comunicação consiste em transferências de dados em bytes. O mestre envia um endereço de dispositivo seguido por dados ou recebe dados do dispositivo escravo. **Você pode usar endereços na base decimal (0 até 127) ou hexadecimal (x00 até x7F)**.
+A comunicação I2C é iniciada pelo mestre (ESP32) e pode envolver um ou mais dispositivos escravos. A comunicação consiste em transferências de dados em bytes. O mestre envia um endereço de dispositivo seguido por dados ou recebe dados do dispositivo escravo. **Você pode usar endereços na base decimal (0 até 127) ou hexadecimal (0x00 até 0x7F)**.
 
-A frequência padrão de transferência de dados é de 100kHz, mas pode chegar a 5MHz.
+Uma frequência comum é 100 kHz. A velocidade máxima depende do controlador, dos dispositivos, dos resistores e da capacitância do barramento; não assuma que todos os módulos suportam os modos mais rápidos do I2C.
 
 A vantagem de usar a comunicação I2C é facilidade e simplicidade da pinagem. O código-fonte é relativamente simples para extrair dados dos sensores.
 
 ## Cabeçalho do I2C
 
-A figura a seguir mostra como o cabeçalho do I2C é organizado. Note que possui os 7 bits do endereçamento e na sequência, 8 bits de dados. É nesses campo de dados que os valores do sensor são transferidos ao ESP32.
+A figura a seguir mostra como o cabeçalho do I2C é organizado. Em uma transferência com endereço de 7 bits, o primeiro byte de endereçamento combina esses 7 bits com o bit de leitura/escrita. Há pulsos de confirmação ACK/NACK e, conforme a operação, podem ser transferidos um ou mais bytes de dados. O protocolo e os registradores específicos dependem do dispositivo.
 
-<picture>
-   <source media="(prefers-color-scheme: light)" srcset="https://github.com/agodoi/m04-semana08/blob/main/imgs/I2C_Basic_Address_and_Data_Frames.jpg">
-   <img alt="Cabeçalho I2C" src="(https://github.com/agodoi/m04-semana08/blob/main/imgs/I2C_Basic_Address_and_Data_Frames.jpg)">
-</picture>
+![Cabeçalho I2C](https://github.com/agodoi/m04-semana08/blob/main/imgs/I2C_Basic_Address_and_Data_Frames.jpg)
 
 ## Documentação Oficial I2C
 
@@ -140,7 +106,7 @@ Esse link está a documentação oficial da fabricante do ESP32, chamada Espress
 
 Para usar o I2C no ESP32, é necessário inicializar e configurar o barramento. A biblioteca mais usada para o I2C chama-se **Wire.h**.
 
-```
+```cpp
 #include <Wire.h>
 
 void setup() {
@@ -155,7 +121,7 @@ void loop() {
 
 #### Enviando dados para um dispositivo escravo:
 
-```
+```cpp
 #include <Wire.h>
 
 void setup() {
@@ -173,7 +139,7 @@ void loop() {
 
 #### Recebendo dados de um dispositivo escravo:
 
-```
+```cpp
 #include <Wire.h>
 
 void setup() {
@@ -232,7 +198,7 @@ Um relé é um dispositivo eletromecânico que utiliza um eletroímã para contr
 
 ## Para que serve no seu projeto?
 
-Tanto no compressor de ar quanto na prensa, o relé serve para cortar a energia elétrica em casos de alarmes críticos, além de ativar uma sirene ou um giroflex para chamar a atenção.
+Em um protótipo, um relé pode ser usado para demonstrar o acionamento de uma carga compatível ou de um sinalizador conforme a leitura de sensores. O circuito da aula é demonstrativo: o controle de segurança de máquinas requer projeto e dispositivos de segurança adequados.
 O relé pode servir como uma chave liga-desliga que só liga se todos os sensores e o algoritmo **autorizar** o correto funcionamento.
 
 Vamos explorar o funcionamento de um relé em detalhes:
@@ -240,7 +206,7 @@ Vamos explorar o funcionamento de um relé em detalhes:
 ### Componentes de um Relé:
 
 1. **Eletroímã (Bobina):**
-   - O coração do relé é a bobina, uma espira de fio condutor. Quando uma corrente elétrica passa pela bobina, cria um campo magnético em torno dela.
+   - O eletroímã é formado por uma bobina com várias espiras de fio condutor. Quando uma corrente elétrica passa pela bobina, cria um campo magnético em torno dela.
 
 2. **Contatos (Comutadores):**
    - Os relés têm contatos móveis que podem estar em uma de duas posições: normalmente abertos (NA) ou normalmente fechados (NF). Os contatos normalmente abertos estão abertos quando a bobina não está energizada, e os contatos normalmente fechados estão fechados quando a bobina não está energizada.
@@ -249,7 +215,7 @@ Vamos explorar o funcionamento de um relé em detalhes:
    - Para garantir a comutação rápida dos contatos, um relé geralmente possui uma mola de retorno que retorna os contatos à sua posição original quando a bobina é desenergizada.
 
 4. **Armatura (Mecanismo de Comutação):**
-   - A armatura é uma peça móvel que é atraída ou repelida pelo campo magnético gerado pela bobina. A armatura é conectada aos contatos móveis.
+   - A armatura é uma peça móvel atraída pelo campo magnético gerado pela bobina. A armatura é conectada aos contatos móveis.
 
 ### Funcionamento Básico:
 
@@ -269,10 +235,7 @@ Vamos explorar o funcionamento de um relé em detalhes:
 
 Aqui está um diagrama esquemático simplificado para ajudar a visualizar o funcionamento:
 
-<picture>
-   <source media="(prefers-color-scheme: light)" srcset="https://github.com/agodoi/m04-semana08/blob/main/imgs/diagrama_rele.png">
-   <img alt="Diagrama Rele" src="(https://github.com/agodoi/m04-semana08/blob/main/imgs/diagrama_rele.png) width="100px">
-</picture>
+![Diagrama Rele](https://github.com/agodoi/m04-semana08/blob/main/imgs/diagrama_rele.png)
 
 1. **Bobina (Circuito de Controle):**
    - O símbolo da bobina representa o circuito de controle que é conectado à fonte de alimentação.
@@ -295,66 +258,36 @@ Aqui está um diagrama esquemático simplificado para ajudar a visualizar o func
 
 Este é um resumo geral do funcionamento de um relé. A complexidade pode variar dependendo do tipo específico de relé (por exemplo, relé eletromagnético, relé de estado sólido), mas os princípios básicos permanecem os mesmos.
 
-Os campos vetoriais são uma ferramenta matemática usada para descrever o comportamento de quantidades vetoriais em diferentes pontos do espaço. Embora o funcionamento específico de um relé não seja geralmente descrito usando campos vetoriais, podemos fazer uma analogia simplificada para ajudar a entender como a energia eletromagnética age sobre a armatura do relé.
-
 ## Como energizar um relé?
 
-Para energnizar um relé, simples use o comando ```digitalWrite(pinoRele,LOW)``` ou ```digitalWrite(pinoRele,HIGH)```. O mais comum é o ```LOW```.
+Um sinal no GPIO pode comandar um **módulo de relé compatível com a saída de 3,3 V do ESP32**, conforme as especificações do módulo. A bobina não deve ser ligada diretamente ao GPIO. Alguns módulos acionam com `LOW` e outros com `HIGH`; consulte o fabricante e verifique também a fonte de alimentação, a corrente e a necessidade de referência comum entre o módulo e o ESP32.
 
-Veja um exemplo:
+A seguir, um exemplo de acionamento **local** por botão com `INPUT_PULLUP`. Ele considera um módulo ativo em nível baixo: pressionar o botão energiza o relé; ao soltá-lo, o relé é desativado. Use o GPIO 33 para o botão e o GPIO 26 para a entrada do módulo, respeitando a pinagem de sua placa. Não conecte cargas de rede elétrica nesta prática.
 
-```
-// Define os pinos utilizados
-const int botaoPin = 2;  // Pino digital conectado ao botão
-const int relePin = 3;   // Pino digital conectado ao relé
+```cpp
+const int PINO_BOTAO = 33;
+const int PINO_RELE = 26;
+const int RELE_LIGADO = LOW;     // Confirme a lógica do seu módulo.
+const int RELE_DESLIGADO = HIGH;
 
 void setup() {
-  // Configuração dos pinos
-  pinMode(botaoPin, INPUT_PULLUP); // Configura o pino do botão como entrada com pull-up interno
-  pinMode(relePin, OUTPUT);         // Configura o pino do relé como saída
-  digitalWrite(relePin, HIGH;      // Inicializa o relé como desativado
+  pinMode(PINO_BOTAO, INPUT_PULLUP);
+  digitalWrite(PINO_RELE, RELE_DESLIGADO);
+  pinMode(PINO_RELE, OUTPUT);
+  Serial.begin(115200);
 }
 
 void loop() {
-  // Verifica se o botão foi pressionado
-  if (digitalRead(botaoPin) == LOW) {
-    // Se o botão foi pressionado, ativa o relé
-    digitalWrite(relePin, LOW);
-    delay(500); // Adiciona um atraso para evitar ativação repetida imediata (debounce)
-    
-    // Aguarda até que o botão seja liberado antes de desativar o relé
-    while (digitalRead(botaoPin) == HIGH) {
-      delay(10); // Debounce
-    }
-    
-    // Desativa o relé
-    digitalWrite(relePin, HIGH);
-  }
+  bool pressionado = digitalRead(PINO_BOTAO) == LOW;
+  digitalWrite(PINO_RELE, pressionado ? RELE_LIGADO : RELE_DESLIGADO);
 }
 ```
 
-### Análise do Funcionamento do Relé com Conceitos Matemáticos:
+Com `INPUT_PULLUP`, ligue o botão entre o GPIO 33 e o GND: `LOW` corresponde a pressionado. Para um módulo ativo em `HIGH`, ajuste as constantes após consultar o professor. Esse exemplo mostra a regra básica; contatos mecânicos podem apresentar *bounce*, que pode exigir debounce. Verifique também o comportamento do módulo durante a inicialização, quando o GPIO ainda pode não estar configurado.
 
-1. **Campo Magnético (B):**
-   - A corrente elétrica que flui através da bobina do relé gera um campo magnético (B). Podemos considerar o campo magnético como um vetor que possui magnitude e direção em cada ponto ao redor da bobina.
+### Relação entre a eletricidade e o funcionamento do relé
 
-2. **Armatura como Vetor Posição (r):**
-   - Podemos associar a armatura do relé com um vetor posição (r), representando a posição da armatura no espaço. À medida que a armatura se move, podemos considerar sua posição em relação à bobina.
-
-3. **Força Magnética (F):**
-   - A armatura, que atua como uma carga magnética, experimenta uma força (F) devido à interação com o campo magnético. A relação entre o campo magnético, a corrente e a força é descrita pela Lei de Ampère.
-
-4. **Equação Vetorial:**
-   - Podemos expressar essa interação em termos de uma equação vetorial, onde a força magnética (F) é proporcional ao produto vetorial da corrente (I) e do vetor posição (r), de acordo com a regra da mão direita.
-
-5. **Movimento da Armatura:**
-   - Quando a corrente é aplicada à bobina, o campo magnético resultante exerce uma força sobre a armatura, movendo-a na direção determinada pelo vetor campo magnético.
-
-6. **Comutação dos Contatos:**
-   - O movimento da armatura causa a comutação dos contatos. Se considerarmos a posição da armatura como um parâmetro de controle, podemos relacionar seu movimento aos estados dos contatos (abertos ou fechados).
-
-Essa abordagem é uma simplificação e não representa um modelo matemático rigoroso, mas pode ajudar a visualizar o funcionamento do relé em termos de campos vetoriais. Em termos práticos, os engenheiros elétricos geralmente usam equações específicas para descrever o comportamento eletromagnético, e os campos vetoriais são ferramentas poderosas para análise em sistemas mais complexos.
-
+A corrente na bobina produz um campo magnético, que exerce força sobre a armadura e movimenta os contatos. O movimento depende da corrente, da geometria, do entreferro e das propriedades dos materiais. Uma análise quantitativa exige um modelo específico do componente; não se obtém a força de um relé pela simples multiplicação vetorial entre corrente e posição.
 
 ## Se for montar sua placa, quais cuidados ao usar relé?
 
@@ -362,157 +295,121 @@ O relé um dispositivo que usa o campo magnético formado em sua bobina interna 
 
 Ao utilizar relés em projetos com o ESP32, é importante ter alguns cuidados para garantir o bom funcionamento, a segurança e a confiabilidade do sistema. Aqui estão alguns cuidados a serem considerados:
 
-1. **Proteção contra Sobrecarga e Transientes:**
-   - Utilize diodos em paralelo aos contatos do relé para proteger contra picos de tensão gerados pela desenergização do relé. Isso ajuda a prevenir danos aos pinos de saída do ESP32. Os módulos azuis de relé que usamos no kit há possuem esse diodo de proteção.
+1. **Bobina e transientes:** uma bobina de corrente contínua precisa de proteção adequada contra a tensão gerada ao ser desligada, frequentemente um diodo de roda livre em paralelo com a bobina, orientado corretamente. Confira o circuito do módulo; não presuma que todo módulo já tenha proteção. Cargas conectadas aos contatos podem exigir proteção própria.
+2. **Acionamento e alimentação:** não ligue a bobina diretamente ao GPIO. Use módulo ou driver apropriado, compatível com sinal de 3,3 V e com a tensão e corrente da bobina. Confira a necessidade de GND comum; isolamento só existe quando o circuito e a alimentação são projetados para isso.
+3. **Contatos e carga:** respeite a tensão, a corrente e o tipo de carga especificados para os contatos. Cargas indutivas exigem atenção especial e, se necessário, supressão apropriada.
+4. **Proteção e isolamento:** um optoacoplador não garante sozinho proteção contra curto-circuito ou isolamento completo. Dimensionamento, fusíveis e separação dependem do projeto.
+5. **Testes:** para a aula, use apenas sinalização de baixa tensão e módulo autorizado. Não conecte rede elétrica, prensa, compressor ou outro equipamento industrial ao protótipo da bancada.
 
-2. **Corrente e Tensão Nominal:**
-   - Verifique se a corrente e a tensão nominais do relé estão dentro das especificações suportadas pela fonte de alimentação.
+## Integração com o broker local da sala
 
-3. **Alimentação Isolada:**
-   - Considere alimentar o relé com uma fonte de alimentação isolada do ESP32 para evitar interferências elétricas que possam afetar a estabilidade do ESP32.
+Na semana 05, o ESP32 enviou o estado de um botão usando `inteli_broker.h`. Agora, vamos dar sequência ao raciocínio: o botão representa a entrada de um sensor, o ESP32 aplica uma regra e aciona **localmente** um módulo de relé; em paralelo, envia informações de monitoramento ao Mosquitto. Um dispositivo I2C pode ser conectado ao barramento e identificado pelo scanner.
 
-4. **Capacidade do Pino de Saída:**
-   - Certifique-se de que os pinos de saída do ESP32 possuem capacidade de corrente suficiente para acionar o relé. Se necessário, utilize um driver de transistores para aumentar a corrente disponível.
+**Importante:** o cabeçalho atual faz publicação de telemetria. Ele não oferece uma função pública para assinar tópicos e receber comandos remotos. Portanto, nesta aula, o Node-RED exibe os dados; ele **não** aciona o relé. O I2C comunica o ESP32 com os dispositivos conectados à placa, enquanto o MQTT leva a telemetria ao broker.
 
-5. **Proteção Eletromagnética (EMI/RFI):**
-   - Adote práticas de design para minimizar interferências eletromagnéticas que podem afetar a operação do ESP32.
+### Arquitetura da T29
 
-6. **Proteção contra Curto-Circuito:**
-   - Inclua acopladores ópticos para integrar a parte do ESP32 com a o relé. Isso garante proteção máxima contra curtos-circuitos que ocorrem no lado do relé e não se propagam para o lado sensível do ESP32.
+* O ESP32 conecta-se ao Wi-Fi IoT da sala e usa o `inteli_broker.h` da pasta `esp32_broker-f`, sem alterar esse arquivo.
+* O Raspberry Pi executa o Mosquitto e o Node-RED; o notebook deve usar preferencialmente a rede do Inteli para abrir o editor e o dashboard do grupo.
+* Cada placa usa um ID livre dentro da faixa do grupo. O ID 222 é exemplo do Grupo 3. Os dados da instância, inclusive a senha exclusiva do editor, serão enviados pelo professor no canal privado de cada grupo.
+* Instale na Arduino IDE o suporte ao ESP32 e a biblioteca **PubSubClient, de Nick O’Leary**. A biblioteca `Wire.h` faz parte do suporte do ESP32.
 
-7. **Testes e Monitoramento:**
-    - Realize testes extensivos para garantir a confiabilidade do sistema. Monitore o comportamento do sistema em diferentes condições de carga.
+### Prática integrada: botão, relé e diagnóstico I2C
 
-## HiveMQ
+A prática abaixo **não inventa uma leitura de sensor**: ela identifica quantos endereços I2C responderam na inicialização. A leitura da grandeza de um sensor real depende do modelo, de seus registradores e, quando necessário, de sua biblioteca. Um botão comanda o relé localmente, enquanto o estado é enviado ao broker junto com a quantidade de endereços identificados.
 
-- **Definição**: O MQTT (Message Queuing Telemetry Transport) é um protocolo de comunicação leve projetado para dispositivos IoT, como o ESP32, que lida com comunicações eficientes e de baixa latência.
-- **Arquitetura**: O protocolo segue um modelo cliente/servidor:
-  - **Broker**: Recebe e distribui mensagens.
-  - **Clientes**: Podem ser dispositivos que publicam ou se inscrevem em tópicos específicos. O ESP32 será um desses clientes. Mas ele também pode ser um assinante de tópicos, como vimos no projeto do Ubidots controlando um LED.
+**Montagem:** botão entre GPIO 33 e GND; SDA no GPIO 21 e SCL no GPIO 22 para uma placa ESP32 compatível, com alimentação e pull-ups adequados ao dispositivo I2C; entrada do módulo de relé no GPIO 26. Confirme o módulo, a alimentação, a compatibilidade do sinal de 3,3 V e a referência de terra conforme o seu circuito. Para observar a saída sem relé, o professor pode orientar uma montagem com LED e resistor adequados, ajustando a lógica do programa. Teste apenas em baixa tensão.
 
-#### **2. O que é o HiveMQ?**
-- **HiveMQ**: Um broker MQTT popular que permite gerenciar conexões de dispositivos IoT com eficiência. Ele oferece uma versão em nuvem que facilita a configuração de testes.
+Salve o sketch e o arquivo `inteli_broker.h` fornecido para a T29 na mesma pasta. O código considera o módulo de relé **ativo em nível baixo**; confirme a lógica antes de energizar. Ajuste `ID_DISPOSITIVO` para um ID livre da faixa do grupo.
 
-#### Documentação completa HiveMQ para criar o primeiro device IoT
+```cpp
+#include <Wire.h>
+#include "inteli_broker.h"
 
-[Documentação](https://docs.hivemq.com/hivemq-cloud/quick-start-guide.html#create-credentials) 
+const int ID_DISPOSITIVO = 222; // Exemplo: grupo 3; use seu próprio ID.
+const int PINO_BOTAO = 33;
+const int PINO_RELE = 26;
+const int SDA_I2C = 21;
+const int SCL_I2C = 22;
+const int RELE_LIGADO = LOW;    // Confirme o módulo utilizado.
+const int RELE_DESLIGADO = HIGH;
+const unsigned long INTERVALO_LEITURA = 5000;
+unsigned long ultimaLeitura = 0;
+int dispositivosI2C = 0;
 
-#### **3. Configurando o HiveMQ Cloud**
-- **Passo 1**: Acesse [HiveMQ Cloud](https://www.hivemq.com/mqtt-cloud-broker/) e crie uma conta gratuita (se ainda não tiver).
-- **Passo 2**: Após o login, você terá acesso ao painel que fornecerá informações do broker, incluindo:
-  - **Host** (endereço do servidor).
-  - **Porta** (1883 para conexões não seguras ou 8883 para seguras).
-  - **Usuário e Senha** (caso necessário).
-
-#### **4. Configuração do ESP32 para MQTT**
-- **Requisitos**:
-  - Arduino IDE instalada.
-  - Biblioteca ```PubSubClient``` para comunicação MQTT (pode ser instalada através do Gerenciador de Bibliotecas da IDE Arduino).
-
-#### **5. Exemplo de Código para o ESP32**
-- **Passo 1**: Conecte o ESP32 ao Wi-Fi e ao broker HiveMQ usando a biblioteca ```PubSubClient```.
-  
-```
-#include <WiFi.h>
-#include <PubSubClient.h>
-
-// Configuração Wi-Fi
-const char* ssid = "SEU_SSID";
-const char* password = "SUA_SENHA";
-
-// Configuração do Broker MQTT (ajuste para os valores fornecidos pelo HiveMQ)
-const char* mqttServer = "broker-endereco-hivemq";
-const int mqttPort = 1883; // Ou 8883 para conexões seguras
-const char* mqttUser = "usuario"; // Opcional
-const char* mqttPassword = "senha"; // Opcional
-
-WiFiClient espClient;
-PubSubClient client(espClient);
-
-void setup() {
-   Serial.begin(115200);
-   WiFi.begin(ssid, password);
-   while (WiFi.status() != WL_CONNECTED) {
-       delay(500);
-       Serial.println("Conectando ao Wi-Fi...");
-   }
-   Serial.println("Wi-Fi conectado!");
-
-   client.setServer(mqttServer, mqttPort);
-   client.setCallback(callback);
-
-   while (!client.connected()) {
-       Serial.println("Conectando ao broker MQTT...");
-       if (client.connect("ESP32Client", mqttUser, mqttPassword)) {
-           Serial.println("Conectado!");
-       } else {
-           Serial.print("Falha de conexão. Código: ");
-           Serial.print(client.state());
-           delay(2000);
-       }
-   }
-   // Inscrever-se em um tópico
-   client.subscribe("meutopico/teste");
+int contarDispositivosI2C() {
+  int total = 0;
+  for (uint8_t endereco = 0x08; endereco <= 0x77; endereco++) {
+    Wire.beginTransmission(endereco);
+    if (Wire.endTransmission() == 0) {
+      Serial.printf("I2C respondeu em 0x%02X\n", endereco);
+      total++;
+    }
+  }
+  return total;
 }
 
-void callback(char* topic, byte* payload, unsigned int length) {
-   Serial.print("Mensagem recebida no tópico: ");
-   Serial.println(topic);
-   Serial.print("Mensagem: ");
-   for (int i = 0; i < length; i++) {
-       Serial.print((char)payload[i]);
-   }
-   Serial.println();
+void setup() {
+  Serial.begin(115200);
+  pinMode(PINO_BOTAO, INPUT_PULLUP);
+  digitalWrite(PINO_RELE, RELE_DESLIGADO);
+  pinMode(PINO_RELE, OUTPUT);
+
+  Wire.begin(SDA_I2C, SCL_I2C);
+  dispositivosI2C = contarDispositivosI2C();
+  Serial.printf("Enderecos I2C encontrados: %d\n", dispositivosI2C);
+
+  InteliBroker.begin(ID_DISPOSITIVO);
 }
 
 void loop() {
-   if (!client.connected()) {
-       // Reconecte-se, se necessário
-       while (!client.connected()) {
-           client.connect("ESP32Client", mqttUser, mqttPassword);
-       }
-   }
-   client.loop();
+  // O acionamento é local, a partir da leitura da entrada.
+  int botao = digitalRead(PINO_BOTAO) == LOW ? 1 : 0;
+  int releComandado = botao;
+  digitalWrite(PINO_RELE, releComandado ? RELE_LIGADO : RELE_DESLIGADO);
 
-   // Publicando mensagens de exemplo
-   client.publish("meutopico/teste", "Olá do ESP32!");
-   delay(2000); // Aguarda 2 segundos antes do próximo envio
+  // Acrescenta campos à próxima mensagem periódica do cabeçalho.
+  if (millis() - ultimaLeitura >= INTERVALO_LEITURA) {
+    ultimaLeitura = millis();
+    InteliBroker.send("botao", botao);
+    InteliBroker.send("rele_comandado", releComandado);
+    InteliBroker.send("i2c_encontrados", dispositivosI2C);
+    Serial.printf("Botao: %d | Rele comandado: %d | I2C: %d\n",
+                  botao, releComandado, dispositivosI2C);
+  }
+  InteliBroker.loop();
 }
 ```
 
-#### 6. Passo a Passo para Configuração e Execução
-- **Conectar ESP32 ao Wi-Fi**: Garanta que ```ssid``` e ```password``` estão corretos.
-- **Configurar Credenciais do Broker MQTT**: Utilize as informações fornecidas pelo HiveMQ (endereço do broker, porta, usuário e senha).
-- **Subscribing (Assinando)**: O ESP32 se inscreverá para receber mensagens de um tópico (```meutopico/teste```).
-- **Publishing (Publicando)**: O ESP32 publicará mensagens periodicamente.
+`rele_comandado` representa a **ordem do programa**, não uma medição independente dos contatos ou da carga. A contagem I2C é feita somente na inicialização; reinicie para repetir a varredura. O intervalo do sketch e o intervalo de publicação do cabeçalho são independentes: os campos extras podem não estar em toda mensagem. Como o `.h` não expõe confirmação de publicação, durante desconexões chamadas repetidas a `send()` podem acumular chaves repetidas. Confira o JSON recebido e informe o professor se isso ocorrer; os dados no dashboard não garantem que todos os eventos foram registrados. A regra simples acima não implementa debounce. No cabeçalho da semana 05, `InteliBroker.begin()` pode aguardar a conexão e reiniciar o ESP32 em caso de falha; durante esse período o `loop()` da aplicação não executa. Portanto, o comportamento local demonstrativo não garante operação contínua em caso de falha de rede e não é uma função de segurança.
 
-#### 7. Testando a Comunicação
-- Utilize uma ferramenta como o [MQTT Explorer](https://mqtt-explorer.com/) para visualizar as mensagens publicadas e testá-las em tempo real.
-- Verifique se o ESP32 está recebendo mensagens do tópico no qual está inscrito.
+### Teste no Node-RED
 
-#### 8. Segurança (Opcional)
-- Para conexões seguras, configure a porta 8883 e ajuste as opções de TLS na biblioteca ```PubSubClient``` (incluindo certificados, se necessário).
+1. Abra, na rede do Inteli, o editor do grupo pelo endereço recebido em privado.
+2. No `mqtt in`, utilize a conexão configurada para o broker da sala e o tópico `inteli/iot/<ID>/telemetria`, substituindo `<ID>` pelo ID do seu ESP32.
+3. Conecte `mqtt in` a `debug`, faça **Deploy** e observe as mensagens. Depois, converta o JSON e use `msg.payload.botao`, `msg.payload.rele_comandado` ou `msg.payload.i2c_encontrados` no painel.
+4. Acione o botão e observe o módulo e as próximas publicações. Como a telemetria é periódica, uma pressão rápida pode não aparecer no dashboard; o relé é comandado localmente enquanto o botão permanece pressionado.
 
----
+Exemplo ilustrativo de payload quando os campos extras estão presentes:
 
-### Conclusão e Prática Final
-- **Objetivo Prático**: Configure um projeto usando ESP32 para enviar e receber dados de sensores via MQTT com o HiveMQ Cloud.
-- **Desafios**:
-  - Alterar tópicos e mensagens publicadas.
-  - Integrar diferentes sensores e publicá-los no broker.
-  - Testar a conexão em ambientes distintos (Wi-Fi local, diferentes redes).
+```json
+{"device":222,"seq":3,"rssi":-55,"uptime_ms":15000,"reconnects":1,"botao":1,"rele_comandado":1,"i2c_encontrados":1}
+```
 
----
+`i2c_encontrados: 1` significa apenas que um endereço respondeu; não informa o tipo nem o valor medido. Para enviar uma leitura real, escolha o sensor, consulte sua documentação e acrescente ao sketch a leitura correta antes de usar `InteliBroker.send("nome", valor)`.
 
-## Comparação Geral:
+### Conclusão e prática final
 
-* Foco de Uso: o HiveMQ é ideal para empresas que necessitam de um broker MQTT escalável e desejam gerenciar sua própria infraestrutura. Já o Ubidots é mais adequado para desenvolvedores que buscam uma plataforma completa para prototipagem e implementação rápida de soluções IoT.
+* Identifique a função de SDA, SCL, GPIO, relé e broker no projeto.
+* Execute o scanner I2C e registre o endereço de cada dispositivo que responder.
+* Demonstre uma regra local de acionamento e observe a telemetria no Node-RED.
+* Explique a diferença entre o **estado comandado** e uma confirmação por sensor do estado físico do relé.
+* Discuta como integrar um sensor I2C real, sua grandeza e seus limites à regra do projeto.
 
-* Complexidade: o HiveMQ pode exigir mais conhecimento técnico para configuração e manutenção, enquanto o Ubidots oferece uma interface mais amigável e pronta para uso.
+## Referências
 
-* Custo: o investimento no HiveMQ pode ser maior (manutenção da nuvem) e precisará de mais de mão-de-obra de DEV para manter de pé a infraestrutura, além de criar o front-end, enquanto o Ubidots oferece planos baseados em assinatura que podem compensar mais laém de encurta a etapa de implantação.
-
-## Código Exemplo Wokwi HiveMQ ESP32
-
-[Exemplo](https://wokwi.com/projects/322524997423727188)
-
+* [Documentação I2C da Espressif para Arduino ESP32](https://docs.espressif.com/projects/arduino-esp32/en/latest/api/i2c.html).
+* [Especificação do barramento I2C da NXP](https://www.nxp.com/docs/en/user-guide/UM10204.pdf).
+* [Orientações da Texas Instruments sobre carga indutiva e diodo de proteção](https://www.ti.com/lit/an/snoa384/snoa384.pdf).
+* [Documentação da biblioteca PubSubClient, de Nick O’Leary](https://pubsubclient.knolleary.net/).
+* Material da semana 05: arquitetura do broker local e arquivo `inteli_broker.h` fornecido para a T29.
