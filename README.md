@@ -251,7 +251,7 @@ Aqui está um diagrama esquemático simplificado para ajudar a visualizar o func
 
 A figura abaixo apresenta um exemplo de ligação de um relé eletromecânico. Observe a bobina à esquerda e os contatos de comutação à direita.
 
-<img src="https://github.com/agodoi/m04-semana06/blob/main/imgs/rele.png" alt="Exemplo de ligação de relé com bobina e contatos comum, normalmente aberto e normalmente fechado" width="700">
+<img src="https://github.com/agodoi/m04-semana06/blob/main/imgs/rele.png" alt="Exemplo de ligação de relé com bobina e contatos comum, normalmente aberto e normalmente fechado" width="500">
 
 * **Bobina:** quando recebe alimentação adequada, cria o campo magnético que movimenta o mecanismo do relé.
 * **Comum (COM):** contato móvel que muda de ligação quando a bobina é energizada.
