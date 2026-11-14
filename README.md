@@ -34,7 +34,7 @@ O barramento I2C (Inter-Integrated Circuit) é um protocolo de comunicação ser
 No ESP32, o I2C é implementado por meio de hardware e software. Veja na Fig. 1, como se comporta fisicamente as conexões eletrônica no barramento I2C.
 
 
-<img src="https://github.com/agodoi/m04-semana06/blob/main/imgs/i2c.png" alt="ESP32 e três sensores compartilhando as linhas SDA e SCL" width="300">
+<img src="https://github.com/agodoi/m04-semana06/blob/main/imgs/i2c.png" alt="ESP32 e três sensores compartilhando as linhas SDA e SCL" width="600">
 
 *Os endereços apresentados são exemplos. A imagem destaca as linhas de comunicação; não representa todas as conexões de alimentação.*
 
