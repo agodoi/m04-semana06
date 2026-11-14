@@ -34,7 +34,7 @@ O barramento I2C (Inter-Integrated Circuit) é um protocolo de comunicação ser
 No ESP32, o I2C é implementado por meio de hardware e software. Veja na Fig. 1, como se comporta fisicamente as conexões eletrônica no barramento I2C.
 
 
-<img src="https://github.com/agodoi/m04-semana06/blob/main/imgs/i2c.png" alt="ESP32 e três sensores compartilhando as linhas SDA e SCL" width="300">
+<img src="https://github.com/agodoi/m04-semana06/blob/main/imgs/i2c.png" alt="ESP32 e três sensores compartilhando as linhas SDA e SCL" width="600">
 
 *Os endereços apresentados são exemplos. A imagem destaca as linhas de comunicação; não representa todas as conexões de alimentação.*
 
@@ -98,7 +98,7 @@ A vantagem de usar a comunicação I2C é facilidade e simplicidade da pinagem. 
 
 A figura a seguir mostra como o cabeçalho do I2C é organizado. Em uma transferência com endereço de 7 bits, o primeiro byte de endereçamento combina esses 7 bits com o bit de leitura/escrita. Há pulsos de confirmação ACK/NACK e, conforme a operação, podem ser transferidos um ou mais bytes de dados. O protocolo e os registradores específicos dependem do dispositivo.
 
-<img src="https://github.com/agodoi/m04-semana06/blob/main/imgs/quadro_i2c.png" alt="Exemplo de quadro I2C com endereço de 7 bits, leitura ou escrita, confirmações e dados" width="700">
+<img src="https://github.com/agodoi/m04-semana06/blob/main/imgs/quadro_i2c.png" alt="Exemplo de quadro I2C com endereço de 7 bits, leitura ou escrita, confirmações e dados" width="500">
 
 ## Documentação Oficial I2C
 
@@ -239,7 +239,7 @@ Vamos explorar o funcionamento de um relé em detalhes:
 
 Aqui está um diagrama esquemático simplificado para ajudar a visualizar o funcionamento:
 
-<img src="https://github.com/agodoi/m04-semana06/blob/main/imgs/bobina.png" alt="Comparação dos contatos do relé com a bobina desenergizada e energizada" width="300">
+<img src="https://github.com/agodoi/m04-semana06/blob/main/imgs/bobina.png" alt="Comparação dos contatos do relé com a bobina desenergizada e energizada" width="600">
 
 1. **Bobina (Circuito de Controle):**
    - O símbolo da bobina representa o circuito de controle que é conectado à fonte de alimentação.
@@ -308,7 +308,7 @@ Ao utilizar relés em projetos com o ESP32, é importante ter alguns cuidados pa
 
 Na semana 05, o ESP32 enviou o estado de um botão usando `inteli_broker.h`. Agora, vamos dar sequência ao raciocínio: o botão representa a entrada de um sensor, o ESP32 aplica uma regra e aciona **localmente** um módulo de relé; em paralelo, envia informações de monitoramento ao Mosquitto. Um dispositivo I2C pode ser conectado ao barramento e identificado pelo scanner.
 
-<img src="https://github.com/agodoi/m04-semana06/blob/main/imgs/arquiteturaI2C.png" alt="Fluxo do botão e do dispositivo I2C ao ESP32, relé, broker e dashboard" width="300">
+<img src="https://github.com/agodoi/m04-semana06/blob/main/imgs/arquiteturaI2C.png" alt="Fluxo do botão e do dispositivo I2C ao ESP32, relé, broker e dashboard" width="600">
 
 *Na figura, o Node-RED aparece destacado para mostrar sua função. Na infraestrutura da sala, tanto o Mosquitto quanto o Node-RED são executados no Raspberry Pi; o notebook acessa o dashboard pela rede do Inteli.*
 
