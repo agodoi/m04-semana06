@@ -34,7 +34,7 @@ O barramento I2C (Inter-Integrated Circuit) é um protocolo de comunicação ser
 No ESP32, o I2C é implementado por meio de hardware e software. Veja na Fig. 1, como se comporta fisicamente as conexões eletrônica no barramento I2C.
 
 
-<img src="https://github.com/agodoi/m04-semana06/blob/main/imgs/i2c.png" alt="ESP32 e três sensores compartilhando as linhas SDA e SCL" width="600">
+<img src="https://github.com/agodoi/m04-semana06/blob/main/imgs/i2c.png" alt="ESP32 e três sensores compartilhando as linhas SDA e SCL" width="300">
 
 *Os endereços apresentados são exemplos. A imagem destaca as linhas de comunicação; não representa todas as conexões de alimentação.*
 
@@ -46,12 +46,14 @@ Note que o mesmo par de fios SDA e SCL é usado para conectar todos os sensores.
 
 Na figura a seguir, é possível entender melhor como um projeto prático pode ser montado:
 
-![Circuito I2C](https://github.com/agodoi/m04-semana08/blob/main/imgs/projetoPraticoI2C.png)
+<img src="https://github.com/agodoi/m04-semana06/blob/main/imgs/projeto_i2c.png" alt="Conexões de dados e alimentação entre ESP32 e módulo I2C" width="700">
 
 Em muitas placas com ESP32, os pinos padrão são SDA no GPIO 21 e SCL no GPIO 22. Os pinos podem variar conforme a placa e ser configurados por software; confirme o modelo e sua pinagem. Use resistores pull-up adequados nas linhas SDA e SCL e confira se os módulos trabalham com níveis lógicos compatíveis com 3,3 V.
 
 
-![Pinout](https://github.com/agodoi/m04-semana08/blob/main/imgs/ESP32-Pinout.jpg)
+<img src="https://github.com/agodoi/m04-semana06/blob/main/imgs/pinos_esp32_aula.png" alt="Funções dos pinos usados no exemplo da aula" width="700">
+
+*A figura apresenta funções lógicas, não a posição física dos pinos. Confira a pinagem do modelo de ESP32 utilizado.*
 
 
 ## Quantidade de Dispositivos Suportados
@@ -96,7 +98,7 @@ A vantagem de usar a comunicação I2C é facilidade e simplicidade da pinagem. 
 
 A figura a seguir mostra como o cabeçalho do I2C é organizado. Em uma transferência com endereço de 7 bits, o primeiro byte de endereçamento combina esses 7 bits com o bit de leitura/escrita. Há pulsos de confirmação ACK/NACK e, conforme a operação, podem ser transferidos um ou mais bytes de dados. O protocolo e os registradores específicos dependem do dispositivo.
 
-![Cabeçalho I2C](https://github.com/agodoi/m04-semana08/blob/main/imgs/I2C_Basic_Address_and_Data_Frames.jpg)
+<img src="https://github.com/agodoi/m04-semana06/blob/main/imgs/quadro_i2c.png" alt="Exemplo de quadro I2C com endereço de 7 bits, leitura ou escrita, confirmações e dados" width="700">
 
 ## Documentação Oficial I2C
 
@@ -245,20 +247,19 @@ Aqui está um diagrama esquemático simplificado para ajudar a visualizar o func
 2. **Contatos (Circuito Controlado):**
    - Os contatos NA (normalmente abertos) e NF (normalmente fechados) representam os circuitos controlados pelo relé.
 
-### Imagem do Interior de um Relé:
+### Exemplo de ligação de um relé
 
-[Interior de um Relé](https://en.m.wikipedia.org/wiki/File:Relay_principle_horizontal_new.gif)
+A figura abaixo apresenta um exemplo de ligação de um relé eletromecânico. Observe a bobina à esquerda e os contatos de comutação à direita.
 
-1. **Bobina (Parte Superior):**
-   - A bobina está localizada na parte superior e é representada pela espira de fio.
+<img src="https://github.com/agodoi/m04-semana06/blob/main/imgs/rele.png" alt="Exemplo de ligação de relé com bobina e contatos comum, normalmente aberto e normalmente fechado" width="700">
 
-2. **Armatura (Peça Móvel):**
-   - A armatura é a peça móvel que se move quando a bobina é energizada.
+* **Bobina:** quando recebe alimentação adequada, cria o campo magnético que movimenta o mecanismo do relé.
+* **Comum (COM):** contato móvel que muda de ligação quando a bobina é energizada.
+* **Normalmente fechado (NF):** ligado ao comum quando a bobina está desenergizada; abre quando o relé é acionado.
+* **Normalmente aberto (NA):** aberto em repouso; conecta-se ao comum quando o relé é acionado.
 
-3. **Contatos (Parte Inferior):**
-   - Os contatos móveis estão na parte inferior e são comutados pela armatura.
+A numeração e a tensão indicadas na imagem pertencem ao exemplo ilustrado. Consulte a documentação do relé usado na bancada antes de realizar a montagem; a bobina não deve ser ligada diretamente ao GPIO do ESP32.
 
-Este é um resumo geral do funcionamento de um relé. A complexidade pode variar dependendo do tipo específico de relé (por exemplo, relé eletromagnético, relé de estado sólido), mas os princípios básicos permanecem os mesmos.
 
 ## Como energizar um relé?
 
