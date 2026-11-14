@@ -1,4 +1,4 @@
-# Semana 06 — Sistema de disparo de atuadores
+# Semana 06: Sistema de disparo de atuadores
 
 Neste encontro, será apresentado como ativar acionadores básicos (linha de força, motores, relés) a partir da resposta de sensores de forma a implementar regras de atuação. Adicionalmente, trataremos no detalhe, como funciona a comunicação I2C.
 
@@ -34,7 +34,9 @@ O barramento I2C (Inter-Integrated Circuit) é um protocolo de comunicação ser
 No ESP32, o I2C é implementado por meio de hardware e software. Veja na Fig. 1, como se comporta fisicamente as conexões eletrônica no barramento I2C.
 
 
-![Barramento I2C](https://github.com/agodoi/m04-semana08/blob/main/imgs/barramentoI2C.png)
+<img src="https://github.com/agodoi/m04-semana06/blob/main/imgs/i2c.png" alt="ESP32 e três sensores compartilhando as linhas SDA e SCL" width="300">
+
+*Os endereços apresentados são exemplos. A imagem destaca as linhas de comunicação; não representa todas as conexões de alimentação.*
 
 
 Note que o mesmo par de fios SDA e SCL é usado para conectar todos os sensores. Não pode haver inversão desses pinos. Se isso acontecer, toda a comunicação será interrompida. A função de cada pino é a seguinte:
@@ -235,7 +237,7 @@ Vamos explorar o funcionamento de um relé em detalhes:
 
 Aqui está um diagrama esquemático simplificado para ajudar a visualizar o funcionamento:
 
-![Diagrama Rele](https://github.com/agodoi/m04-semana08/blob/main/imgs/diagrama_rele.png)
+<img src="https://github.com/agodoi/m04-semana06/blob/main/imgs/bobina.png" alt="Comparação dos contatos do relé com a bobina desenergizada e energizada" width="300">
 
 1. **Bobina (Circuito de Controle):**
    - O símbolo da bobina representa o circuito de controle que é conectado à fonte de alimentação.
@@ -304,6 +306,10 @@ Ao utilizar relés em projetos com o ESP32, é importante ter alguns cuidados pa
 ## Integração com o broker local da sala
 
 Na semana 05, o ESP32 enviou o estado de um botão usando `inteli_broker.h`. Agora, vamos dar sequência ao raciocínio: o botão representa a entrada de um sensor, o ESP32 aplica uma regra e aciona **localmente** um módulo de relé; em paralelo, envia informações de monitoramento ao Mosquitto. Um dispositivo I2C pode ser conectado ao barramento e identificado pelo scanner.
+
+<img src="https://github.com/agodoi/m04-semana06/blob/main/imgs/arquiteturaI2C.png" alt="Fluxo do botão e do dispositivo I2C ao ESP32, relé, broker e dashboard" width="300">
+
+*Na figura, o Node-RED aparece destacado para mostrar sua função. Na infraestrutura da sala, tanto o Mosquitto quanto o Node-RED são executados no Raspberry Pi; o notebook acessa o dashboard pela rede do Inteli.*
 
 **Importante:** o cabeçalho atual faz publicação de telemetria. Ele não oferece uma função pública para assinar tópicos e receber comandos remotos. Portanto, nesta aula, o Node-RED exibe os dados; ele **não** aciona o relé. O I2C comunica o ESP32 com os dispositivos conectados à placa, enquanto o MQTT leva a telemetria ao broker.
 
