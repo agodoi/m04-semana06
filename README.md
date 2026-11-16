@@ -160,7 +160,7 @@ void loop() {
 
 ## Comunicação I2C:
 
-A comunicação I2C é iniciada pelo mestre (ESP32) e pode envolver um ou mais dispositivos escravos. A comunicação consiste em transferências de dados em bytes. O mestre envia um endereço de dispositivo seguido por dados ou recebe dados do dispositivo escravo. **Você pode usar endereços na base decimal (0 até 127) ou hexadecimal (0x00 até 0x7F)**.
+A comunicação I2C é iniciada pelo mestre (ESP32) e pode envolver um ou mais dispositivos secundários. A comunicação consiste em transferências de dados em bytes. O mestre envia um endereço de dispositivo seguido por dados ou recebe dados do dispositivo secundário. **Você pode usar endereços na base decimal (0 até 127) ou hexadecimal (0x00 até 0x7F)**.
 
 Uma frequência comum é 100 kHz. A velocidade máxima depende do controlador, dos dispositivos, dos resistores e da capacitância do barramento; não assuma que todos os módulos suportam os modos mais rápidos do I2C.
 
@@ -195,7 +195,7 @@ void loop() {
 }
 ```
 
-#### Enviando dados para um dispositivo escravo:
+#### Enviando dados para um dispositivo secundário:
 
 ```cpp
 #include <Wire.h>
@@ -206,14 +206,14 @@ void setup() {
 }
 
 void loop() {
-  Wire.beginTransmission(8); // 8 é o endereço do dispositivo escravo
+  Wire.beginTransmission(8); // 8 é o endereço do dispositivo secundário
   Wire.write(42);            // Dado a ser enviado
   Wire.endTransmission();
   delay(500);
 }
 ```
 
-#### Recebendo dados de um dispositivo escravo:
+#### Recebendo dados de um dispositivo secundário:
 
 ```cpp
 #include <Wire.h>
@@ -224,7 +224,7 @@ void setup() {
 }
 
 void loop() {
-  Wire.requestFrom(8, 6); // Solicita 6 bytes do dispositivo escravo com endereço 8
+  Wire.requestFrom(8, 6); // Solicita 6 bytes do dispositivo secundário com endereço 8
   while (Wire.available()) {
     char c = Wire.read(); // Lê os dados recebidos
     Serial.print(c);
