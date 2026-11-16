@@ -27,6 +27,78 @@ Neste encontro, será apresentado como ativar acionadores básicos (linha de for
 https://portal.vidadesilicio.com.br/descobrindo-o-endereco-i2c/
 
 
+## RM-ODP: descrevendo a arquitetura da solução
+
+Antes de montar o circuito ou programar o ESP32, vale responder: **qual problema o sistema resolve, quais informações ele utiliza e como suas partes trabalham juntas?** Para organizar essas respostas, podemos usar o RM-ODP.
+
+O **RM-ODP** (*Reference Model for Open Distributed Processing*, ou Modelo de Referência para Processamento Distribuído Aberto) é um modelo de referência para descrever sistemas distribuídos. Ele propõe observar o mesmo sistema por **cinco pontos de vista complementares**. Cada ponto de vista destaca uma preocupação diferente; juntos, eles ajudam a compreender a solução sem precisar colocar todos os detalhes em um único diagrama.
+
+Pense na planta de uma construção: uma vista mostra a distribuição dos ambientes, outra mostra a instalação elétrica e outra, a hidráulica. Todas descrevem a mesma construção, mas cada uma responde a perguntas diferentes.
+
+> O RM-ODP organiza a especificação, mas não determina uma sequência obrigatória de etapas nem substitui a metodologia de desenvolvimento escolhida pelo grupo. As cinco visões precisam ser coerentes entre si.
+
+### Os cinco pontos de vista
+
+| Ponto de vista | Pergunta principal | O que descreve |
+|---|---|---|
+| **Empresarial (Enterprise)** | Para quem e para quê? | Objetivos, envolvidos, regras e políticas do sistema. |
+| **Informação (Information)** | Quais dados existem e o que significam? | Dados, significado, relações e regras para sua interpretação. |
+| **Computacional (Computational)** | Quais partes realizam as funções? | Funções ou objetos e as interfaces pelas quais interagem, sem precisar definir onde cada parte será executada. |
+| **Engenharia (Engineering)** | Como as partes interagem à distância? | Mecanismos de comunicação, distribuição e suporte à interação entre as partes. |
+| **Tecnologia (Technology)** | Com quais recursos será construído? | Hardware, software e tecnologias escolhidos para implementar a solução. |
+
+### Aplicando o RM-ODP à prática desta aula
+
+Considere o sistema demonstrativo desta semana: um botão é lido pelo ESP32, que comanda **localmente** um módulo de relé e publica dados de monitoramento para visualização no Node-RED. Um dispositivo I2C pode ser identificado pelo scanner na inicialização.
+
+| Ponto de vista | Exemplo aplicado à prática |
+|---|---|
+| **Empresarial** | **Objetivo:** demonstrar a leitura de uma entrada e acompanhar o estado comandado de uma saída. **Envolvidos:** integrantes do grupo e professor. **Regra:** usar apenas a faixa de IDs e a instância Node-RED atribuídas ao grupo. |
+| **Informação** | A mensagem pode conter `device`, `botao`, `rele_comandado` e `i2c_encontrados`. O campo `botao` representa a leitura da entrada; `rele_comandado` representa a ordem enviada ao módulo, não uma confirmação física; `i2c_encontrados` representa a quantidade de endereços que responderam à varredura inicial. |
+| **Computacional** | Uma função lê a entrada, outra aplica a regra de acionamento, outra publica a telemetria e outra apresenta os dados ao usuário. As interações devem definir quais informações cada função recebe ou fornece. |
+| **Engenharia** | A telemetria percorre uma rede local usando o modelo de publicação e assinatura: o cliente publica em um tópico, um intermediário encaminha as mensagens e o cliente interessado as recebe. O acionamento do relé nesta prática é local, realizado pelo ESP32. |
+| **Tecnologia** | ESP32, botão, módulo de relé compatível, dispositivo I2C, Wi-Fi da sala, protocolo MQTT, Mosquitto e Node-RED no Raspberry Pi. O arquivo `inteli_broker.h` e a biblioteca `PubSubClient` implementam a comunicação MQTT usada no exemplo. |
+
+Observe que um **scanner I2C identifica endereços que respondem**; ele não descobre automaticamente qual é o sensor nem mede sua grandeza. Para incorporar uma medição real ao projeto, é necessário conhecer o dispositivo e implementar sua leitura.
+
+### Como as visões se conectam?
+
+As visões não são cinco sistemas diferentes: elas descrevem o mesmo projeto. Uma decisão em uma visão deve fazer sentido nas demais. Veja o percurso do campo `rele_comandado`:
+
+1. **Empresarial:** o grupo decide que precisa acompanhar a ordem de acionamento do relé.
+2. **Informação:** define `rele_comandado` como `0` para desligado e `1` para ligado, representando a ordem do programa.
+3. **Computacional:** a função de controle disponibiliza o estado comandado para a função responsável pela publicação.
+4. **Engenharia:** esse estado é transportado pela comunicação de telemetria entre o dispositivo e o sistema de visualização.
+5. **Tecnologia:** o ESP32 publica uma mensagem MQTT pelo `inteli_broker.h`; Mosquitto e Node-RED participam da entrega e visualização.
+
+**Atenção:** a mensagem informa o que o programa mandou fazer. Para comprovar o estado físico dos contatos ou da carga, seria necessário um mecanismo de medição ou retorno apropriado. Além disso, a publicação é periódica e pode haver falhas ou perda de mensagens; o dashboard não é, por si só, prova de que todos os eventos foram registrados.
+
+### Microsserviços e interfaces: uma conexão possível
+
+Na apresentação de referência, os pontos de vista também são relacionados a microsserviços. Um microsserviço pode ser descrito, na visão computacional, como uma parte responsável por determinada função e acessada por interfaces definidas. Por exemplo, em uma solução mais ampla, um serviço de alertas poderia receber leituras e disponibilizar os alertas gerados.
+
+O **contrato da interface** esclarece o que será trocado e quais regras se aplicam: campos obrigatórios, significado dos valores e comportamento esperado. Depois, as visões de engenharia e tecnologia ajudam a descrever, respectivamente, como a interação distribuída será suportada e quais produtos e plataformas serão utilizados.
+
+> A prática desta aula **não exige a criação de microsserviços**. O exemplo serve para mostrar como o RM-ODP também pode organizar soluções maiores.
+
+### Atividade: descreva o projeto do seu grupo
+
+Em grupo, elaborem um quadro com os cinco pontos de vista. Usem o projeto que estão desenvolvendo e procurem responder:
+
+1. **Empresarial:** qual problema o projeto pretende resolver, para quem e quais regras são importantes?
+2. **Informação:** quais dados serão coletados ou gerados? O que cada dado significa e, quando aplicável, qual é sua unidade?
+3. **Computacional:** quais funções ou partes da solução são responsáveis por coletar, processar, apresentar e, se houver, acionar algo?
+4. **Engenharia:** como as partes se comunicam? Onde entram rede, protocolo e intermediação de mensagens?
+5. **Tecnologia:** quais sensores, microcontroladores, redes, plataformas e softwares o grupo pretende usar?
+
+Por fim, escolham **um dado** e expliquem como ele aparece nas cinco visões. Indiquem o que já foi implementado e o que ainda é uma decisão ou proposta do grupo.
+
+### Referências para aprofundamento
+
+* [ITU-T X.901 — Visão geral do modelo de referência ODP](https://www.itu.int/rec/T-REC-X.901/en).
+* [ITU-T X.906 — Uso de UML para especificações ODP](https://www.itu.int/dms_pubrec/itu-t/rec/x/T-REC-X.906-201410-I%21%21PDF-E.pdf).
+* [Building Enterprise Systems with ODP — Capítulo 1](https://theodpbook.lcc.uma.es/docs/Chapter1.pdf), indicado no material de referência da aula.
+
 ## Protocolo I2C
 
 O barramento I2C (Inter-Integrated Circuit) é um protocolo de comunicação serial que permite a interconexão de vários dispositivos em um mesmo barramento. 
